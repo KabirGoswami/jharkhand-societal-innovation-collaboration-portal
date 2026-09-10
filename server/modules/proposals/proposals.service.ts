@@ -20,7 +20,7 @@ export class ProposalService {
         teamLeadName: studentTeam?.leadName,
         teamLeadEmail: studentTeam?.leadEmail,
         teamMembersCount: studentTeam?.membersCount || 4,
-        teamDepartments: JSON.stringify(studentTeam?.departments || []),
+        teamDepartments: studentTeam?.departments || [],
         budgetHardware: budgetBreakdown?.hardwareEquip || 0,
         budgetPrototyping: budgetBreakdown?.prototyping || 0,
         budgetFieldTesting: budgetBreakdown?.fieldTesting || 0,
@@ -96,7 +96,7 @@ export class ProposalService {
         leadName: p.teamLeadName,
         leadEmail: p.teamLeadEmail,
         membersCount: p.teamMembersCount,
-        departments: JSON.parse(p.teamDepartments || '[]'),
+        departments: p.teamDepartments || [],
       },
       budgetBreakdown: {
         hardwareEquip: p.budgetHardware,

@@ -2,6 +2,7 @@ import { gemini } from '../../utils/gemini';
 import { logger } from '../../utils/logger';
 import { problemsService } from '../problems/problems.service';
 import { universityService } from '../universities/universities.service';
+import { cosineSimilarity } from '../../utils/math';
 
 export class AIService {
   async analyzeProblem(data: {
@@ -64,24 +65,25 @@ Return a strict JSON object with:
       const rawText = await gemini.generateContent(prompt);
       const parsed = JSON.parse(rawText);
 
-      // Deduplication check via problemsService
+      // Semantic Deduplication via embeddings
+      const currentEmbedding = await gemini.embedContent(data.description);
       const allProblems = await problemsService.getAllProblems({});
-      const lowerDesc = data.description.toLowerCase();
+
       const duplicateMatches = allProblems
-        .filter((p: any) => {
-          const overlap = p.title.toLowerCase().split(' ').filter((w: string) => w.length > 4 && lowerDesc.includes(w));
-          return overlap.length >= 2;
-        })
+        .filter((p: any) => p.embedding && p.embedding.length > 0)
         .map((p: any) => ({
           problemId: p.id,
           title: p.title,
-          similarity: Math.min(85, 45 + Math.floor(Math.random() * 35)),
+          similarity: Math.round(cosineSimilarity(currentEmbedding, p.embedding) * 100),
           district: p.district,
         }))
+        .filter((match: any) => match.similarity >= 75) // Threshold for duplicate
+        .sort((a, b) => b.similarity - a.similarity)
         .slice(0, 3);
 
       return {
         ...parsed,
+        embedding: currentEmbedding,
         duplicateMatches,
       };
     } catch (err: any) {

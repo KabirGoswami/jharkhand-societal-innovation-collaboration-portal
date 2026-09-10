@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─── Models ──────────────────────────────────────────────
@@ -40,6 +41,7 @@ model Problem {
   trackingCode         String        @unique
   title                String
   description          String
+  embedding            Float[]       // Semantic vector for deduplication
   domain               String
   district             String
   blockOrPanchayat     String        @default("District Headquarter Zone")
@@ -98,8 +100,8 @@ model AIAnalysis {
   subCategory           String
   priorityScore         Int         // 1–100
   urgencyLevel          String
-  thematicTags          String    // Changed to JSON string for SQLite compatibility
-  recommendedTech       String    // Changed to JSON string for SQLite compatibility
+  thematicTags          Json
+  recommendedTech       Json
   nepRelevance          String?
   estimatedBudgetBand   String?
   socialImpactPotential String?
@@ -142,8 +144,8 @@ model University {
   district               String
   type                   String
   establishedYear        Int
-  specializationDomains  String    // Changed to JSON string for SQLite compatibility
-  departments            String    // Changed to JSON string for SQLite compatibility
+  specializationDomains  Json
+  departments            Json
   incubationCenter       String?
   website                String?
   activeProjectsCount    Int             @default(0)
@@ -178,13 +180,13 @@ model IndustryPartner {
   id                    String              @id @default(uuid())
   name                  String
   type                  String
-  focusDomains          String              // Stored as JSON string
+  focusDomains          Json
   headquarters          String
   csrBudgetCommitted    Float               @default(0)
   availableMentors      Int                 @default(0)
   activeCollaborations  Int                 @default(0)
   description           String?
-  pilotTestSites        String              // Stored as JSON string
+  pilotTestSites        Json
   contactPerson         String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -222,7 +224,7 @@ model SolutionProposal {
   teamLeadName          String?
   teamLeadEmail         String?
   teamMembersCount      Int             @default(4)
-  teamDepartments       String          // Stored as JSON string
+  teamDepartments       Json
 
   // Budget breakdown
   budgetHardware        Float           @default(0)

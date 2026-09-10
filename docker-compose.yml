@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+    restart: always
+
+  # If using external DB, we don't need a db service here,
+  # but we could add one for local dev if we wanted.

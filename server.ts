@@ -16,6 +16,9 @@ import proposalsRoutes from './server/modules/proposals/proposals.routes';
 import aiRoutes from './server/modules/ai/ai.routes';
 import discussionsRoutes from './server/modules/discussions/discussions.routes';
 import authRoutes from './server/modules/auth/auth.routes';
+import notificationsRoutes from './server/modules/notifications/notifications.routes';
+import mediaRoutes from './server/modules/media/media.routes';
+import { setupSwagger } from './server/utils/swagger';
 
 dotenv.config();
 
@@ -41,6 +44,14 @@ async function startServer() {
   app.use('/api/ai', aiRoutes);
   app.use('/api/discussions', discussionsRoutes);
   app.use('/api/auth', authRoutes);
+  app.use('/api/notifications', notificationsRoutes);
+  app.use('/api/media', mediaRoutes);
+
+  // Swagger Documentation
+  setupSwagger(app);
+
+  // Serve uploaded files statically
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Global error handler (must be registered AFTER all routes)
   app.use(errorHandler);

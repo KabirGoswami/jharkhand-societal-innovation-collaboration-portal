@@ -18,14 +18,6 @@ import {
   SolutionProposal,
   SystemNotification
 } from './types';
-import {
-  INITIAL_PROBLEMS,
-  INITIAL_ANALYTICS,
-  JHARKHAND_UNIVERSITIES,
-  JHARKHAND_INDUSTRY_PARTNERS,
-  INITIAL_SOLUTION_PROPOSALS,
-  INITIAL_NOTIFICATIONS
-} from './data/jharkhandData';
 import { Loader2, Sparkles, Building2, Briefcase, GraduationCap, Compass } from 'lucide-react';
 
 export default function App() {
@@ -35,12 +27,12 @@ export default function App() {
   const [userRole, setUserRole] = useState<'citizen' | 'university' | 'industry' | 'admin'>('citizen');
 
   // Core Datasets
-  const [problems, setProblems] = useState<ProblemStatement[]>(INITIAL_PROBLEMS);
-  const [analytics, setAnalytics] = useState<AnalyticsSummary>(INITIAL_ANALYTICS);
-  const [universities, setUniversities] = useState<University[]>(JHARKHAND_UNIVERSITIES);
-  const [industryPartners, setIndustryPartners] = useState<IndustryPartner[]>(JHARKHAND_INDUSTRY_PARTNERS);
-  const [proposals, setProposals] = useState<SolutionProposal[]>(INITIAL_SOLUTION_PROPOSALS);
-  const [notifications, setNotifications] = useState<SystemNotification[]>(INITIAL_NOTIFICATIONS);
+  const [problems, setProblems] = useState<ProblemStatement[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsSummary>({} as AnalyticsSummary);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [industryPartners, setIndustryPartners] = useState<IndustryPartner[]>([]);
+  const [proposals, setProposals] = useState<SolutionProposal[]>([]);
+  const [notifications, setNotifications] = useState<SystemNotification[]>([]);
 
   // Modals & Selection
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -52,12 +44,13 @@ export default function App() {
   // Initial Data Fetching from server APIs
   const loadAllData = async () => {
     try {
-      const [probRes, anaRes, uniRes, indRes, propRes] = await Promise.all([
+      const [probRes, anaRes, uniRes, indRes, propRes, notifRes] = await Promise.all([
         fetch('/api/problems'),
         fetch('/api/analytics'),
         fetch('/api/universities'),
         fetch('/api/industry/partners'),
         fetch('/api/proposals'),
+        fetch('/api/notifications'),
       ]);
 
       if (probRes.ok) {
@@ -65,8 +58,8 @@ export default function App() {
         const problemsData = probData.data || probData;
         const normalizedProblems = problemsData.map((p: any) => ({
           ...p,
-          mediaUrls: p.mediaAttachments && p.mediaAttachments.length > 0 
-            ? p.mediaAttachments.map((a: any) => a.url) 
+          mediaUrls: p.mediaAttachments && p.mediaAttachments.length > 0
+            ? p.mediaAttachments.map((a: any) => a.url)
             : p.mediaUrls || [],
         }));
         setProblems(normalizedProblems);
@@ -86,6 +79,10 @@ export default function App() {
       if (propRes.ok) {
         const propData = await propRes.json();
         setProposals(propData.data || propData);
+      }
+      if (notifRes.ok) {
+        const notifData = await notifRes.json();
+        setNotifications(notifData.data || notifData);
       }
     } catch (err) {
       console.warn('API fetch warning, using seeded data:', err);

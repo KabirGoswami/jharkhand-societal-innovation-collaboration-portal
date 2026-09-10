@@ -1,5 +1,7 @@
 import { prisma } from '../../config/db';
 import { ProblemStatement } from '../../../src/types';
+import { emailService } from '../../utils/email';
+import { logger } from '../../utils/logger';
 
 export class ProblemsService {
   async getAllProblems(filters: {
@@ -61,7 +63,7 @@ export class ProblemsService {
     });
   }
 
-  async createProblem(data: any) {
+  async createProblem(data: any & { embedding?: number[] }) {
     const year = new Date().getFullYear();
     const count = await prisma.problem.count() + 1;
     const districtCode = (data.district || 'JHK').slice(0, 3).toUpperCase();
@@ -101,6 +103,7 @@ export class ProblemsService {
         trackingCode,
         title: data.title,
         description: data.description,
+        embedding: data.embedding || [],
         domain: data.domain,
         district: data.district,
         blockOrPanchayat: data.blockOrPanchayat || 'District Headquarter Zone',
@@ -130,8 +133,8 @@ export class ProblemsService {
             subCategory: aiAnalysis.subCategory,
             priorityScore: aiAnalysis.priorityScore,
             urgencyLevel: aiAnalysis.urgencyLevel,
-            thematicTags: JSON.stringify(aiAnalysis.thematicTags) as any,
-            recommendedTech: JSON.stringify(aiAnalysis.recommendedTech) as any,
+            thematicTags: aiAnalysis.thematicTags,
+            recommendedTech: aiAnalysis.recommendedTech,
             nepRelevance: aiAnalysis.nepRelevance,
             estimatedBudgetBand: aiAnalysis.estimatedBudgetBand,
             socialImpactPotential: aiAnalysis.socialImpactPotential,
@@ -146,7 +149,12 @@ export class ProblemsService {
   }
 
   async assignToHei(id: string, heiId: string, department: string) {
-    return await prisma.problem.update({
+    const problem = await this.getProblemById(id);
+    const university = await prisma.university.findUnique({ where: { id: heiId } });
+
+    if (!problem || !university) throw new Error('Problem or University not found');
+
+    const updated = await prisma.problem.update({
       where: { id },
       data: {
         assignedHeiId: heiId,
@@ -154,6 +162,15 @@ export class ProblemsService {
         status: 'assigned_to_hei',
       },
     });
+
+    // Trigger Email Notification
+    emailService.sendEmail(
+      university.email || 'admin@university.edu',
+      `New Societal Challenge Assigned: ${problem.title}`,
+      `Dear ${university.name} Administration,\n\nA new societal challenge from ${problem.district} has been assigned to your institution's ${department} department.\n\nTracking Code: ${problem.trackingCode}\nChallenge: ${problem.title}\n\nPlease review and assign a multidisciplinary faculty-student team.\n\nRegards,\nJharkhand State Registry`
+    ).catch(err => logger.error('Failed to send assignment email:', err));
+
+    return updated;
   }
 
   async updateStatus(id: string, updates: {

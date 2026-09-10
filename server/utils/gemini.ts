@@ -34,6 +34,17 @@ class GeminiClient {
     return response.text || '{}';
   }
 
+  public async embedContent(text: string, modelName = 'text-embedding-004') {
+    if (!this.client) {
+      throw new Error('Gemini client not initialized. Check your API key.');
+    }
+    const response = await this.client.models.embedContent({
+      model: modelName,
+      content: { parts: [{ text }] },
+    });
+    return response.embedding.values;
+  }
+
   public isConfigured(): boolean {
     return !!this.client;
   }
