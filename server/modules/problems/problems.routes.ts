@@ -1,0 +1,67 @@
+import { Router } from 'express';
+import { problemsService } from './problems.service';
+import { sendResponse, sendError } from '../../utils/apiResponse';
+import { authenticate, roleGuard } from '../../middleware/auth';
+
+const router = Router();
+
+router.get('/', async (req, res) => {
+  try {
+    const problems = await problemsService.getAllProblems(req.query as any);
+    sendResponse(res, problems);
+  } catch (err: any) {
+    sendError(res, err.message);
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  try {
+    const problem = await problemsService.getProblemById(req.params.id);
+    if (!problem) {
+      return sendError(res, 'Problem statement not found', 404);
+    }
+    sendResponse(res, problem);
+  } catch (err: any) {
+    sendError(res, err.message);
+  }
+});
+
+router.post('/:id/upvote', authenticate, async (req, res) => {
+  try {
+    const problem = await problemsService.upvoteProblem(req.params.id);
+    sendResponse(res, { success: true, upvotesCount: problem.upvotesCount });
+  } catch (err: any) {
+    sendError(res, err.message);
+  }
+});
+
+router.post('/', authenticate, async (req, res) => {
+  try {
+    const problem = await problemsService.createProblem(req.body);
+    sendResponse(res, problem, 201);
+  } catch (err: any) {
+    sendError(res, err.message, 400);
+  }
+});
+
+router.post('/:id/assign', authenticate, roleGuard('GOVT_ADMIN'), async (req, res) => {
+  try {
+    const { heiId, department } = req.body;
+    if (!heiId) return sendError(res, 'heiId is required', 400);
+    const problem = await problemsService.assignToHei(req.params.id, heiId, department);
+    sendResponse(res, problem);
+  } catch (err: any) {
+    sendError(res, err.message);
+  }
+});
+
+router.patch('/:id/status', authenticate, roleGuard('GOVT_ADMIN', 'FACULTY', 'INDUSTRY_REP'), async (req, res) => {
+  try {
+    const problem = await problemsService.updateStatus(req.params.id, req.body);
+    sendResponse(res, problem);
+  } catch (err: any) {
+    sendError(res, err.message);
+  }
+});
+
+export default router;

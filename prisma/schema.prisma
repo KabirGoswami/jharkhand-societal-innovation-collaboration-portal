@@ -1,0 +1,325 @@
+// Jharkhand Societal Innovation Collaboration Portal
+// Prisma Schema — SQLite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          String    @default("CITIZEN")
+  phone         String?
+  organization  String?
+  avatarUrl     String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  submittedProblems  Problem[]
+  discussions        Discussion[]
+  notifications      Notification[]  @relation("NotificationRecipient")
+  auditLogs          AuditLog[]
+
+  @@index([role])
+  @@index([email])
+}
+
+model Problem {
+  id                   String        @id @default(uuid())
+  trackingCode         String        @unique
+  title                String
+  description          String
+  domain               String
+  district             String
+  blockOrPanchayat     String        @default("District Headquarter Zone")
+  locationLat          Float?
+  locationLng          Float?
+  locationAddress      String?
+  urgency              String        @default("High")
+  affectedPopulation   Int           @default(0)
+  status               String        @default("submitted")
+  socialImpactMetric   String?
+  viewsCount           Int           @default(0)
+  upvotesCount         Int           @default(0)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  // Submitter info
+  submittedById        String?
+  submittedBy          User?         @relation(fields: [submittedById], references: [id])
+  submitterName        String        @default("Concerned Citizen")
+  submitterType        String        @default("citizen")
+  submitterContact     String?
+  submitterEmail       String?
+  submitterOrg         String?
+
+  // Assignment
+  assignedHeiId        String?
+  assignedHei          University?   @relation(fields: [assignedHeiId], references: [id])
+  assignedHeiName      String?
+  assignedDepartment   String?
+
+  // Industry Partner
+  partnerIndustryId    String?
+  partnerIndustry      IndustryPartner? @relation(fields: [partnerIndustryId], references: [id])
+  partnerIndustryName  String?
+  fundingAmount        Float?
+
+  // Relations
+  aiAnalysis           AIAnalysis?
+  mediaAttachments     MediaAttachment[]
+  discussions          Discussion[]
+  proposals            SolutionProposal[]
+  auditLogs            AuditLog[]
+
+  @@index([domain])
+  @@index([district])
+  @@index([status])
+  @@index([trackingCode])
+  @@index([createdAt])
+}
+
+model AIAnalysis {
+  id                    String      @id @default(uuid())
+  problemId             String      @unique
+  problem               Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  category              String
+  subCategory           String
+  priorityScore         Int         // 1–100
+  urgencyLevel          String
+  thematicTags          String    // Changed to JSON string for SQLite compatibility
+  recommendedTech       String    // Changed to JSON string for SQLite compatibility
+  nepRelevance          String?
+  estimatedBudgetBand   String?
+  socialImpactPotential String?
+  createdAt             DateTime    @default(now())
+
+  // Sub-relations
+  matchedHeis           MatchedHEI[]
+  duplicateMatches      DuplicateMatch[]
+}
+
+model MatchedHEI {
+  id              String      @id @default(uuid())
+  aiAnalysisId    String
+  aiAnalysis      AIAnalysis  @relation(fields: [aiAnalysisId], references: [id], onDelete: Cascade)
+  universityId    String
+  universityName  String
+  department      String
+  matchScore      Int         // 0–100
+  reason          String
+
+  @@index([aiAnalysisId])
+}
+
+model DuplicateMatch {
+  id              String      @id @default(uuid())
+  aiAnalysisId    String
+  aiAnalysis      AIAnalysis  @relation(fields: [aiAnalysisId], references: [id], onDelete: Cascade)
+  problemId       String
+  title           String
+  similarity      Int         // 0–100
+  district        String
+
+  @@index([aiAnalysisId])
+}
+
+model University {
+  id                     String          @id @default(uuid())
+  name                   String
+  shortName              String
+  district               String
+  type                   String
+  establishedYear        Int
+  specializationDomains  String    // Changed to JSON string for SQLite compatibility
+  departments            String    // Changed to JSON string for SQLite compatibility
+  incubationCenter       String?
+  website                String?
+  activeProjectsCount    Int             @default(0)
+  studentResearchersCount Int            @default(0)
+  rating                 Float           @default(0)
+  logoUrl                String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  // Relations
+  facultyMentors         FacultyMentor[]
+  assignedProblems       Problem[]
+  proposals              SolutionProposal[]
+
+  @@index([district])
+}
+
+model FacultyMentor {
+  id              String      @id @default(uuid())
+  universityId    String
+  university      University  @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  name            String
+  designation     String
+  department      String
+  email           String
+  specialization  String
+
+  @@index([universityId])
+}
+
+model IndustryPartner {
+  id                    String              @id @default(uuid())
+  name                  String
+  type                  String
+  focusDomains          String              // Stored as JSON string
+  headquarters          String
+  csrBudgetCommitted    Float               @default(0)
+  availableMentors      Int                 @default(0)
+  activeCollaborations  Int                 @default(0)
+  description           String?
+  pilotTestSites        String              // Stored as JSON string
+  contactPerson         String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  // Relations
+  problems              Problem[]
+  proposals             SolutionProposal[]
+
+  @@index([type])
+}
+
+model SolutionProposal {
+  id                    String          @id @default(uuid())
+  problemId             String
+  problem               Problem         @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  problemTitle          String
+  heiId                 String
+  hei                   University      @relation(fields: [heiId], references: [id])
+  heiName               String
+  projectTitle          String
+  abstract              String
+  technologyMethodology String
+  nepExperientialCredits Int            @default(6)
+  ipPotential           String          @default("PATENTABLE_TECHNOLOGY")
+  status                String          @default("draft")
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // Faculty mentor (embedded)
+  mentorName            String?
+  mentorDepartment      String?
+  mentorEmail           String?
+
+  // Student team (embedded)
+  teamLeadName          String?
+  teamLeadEmail         String?
+  teamMembersCount      Int             @default(4)
+  teamDepartments       String          // Stored as JSON string
+
+  // Budget breakdown
+  budgetHardware        Float           @default(0)
+  budgetPrototyping     Float           @default(0)
+  budgetFieldTesting    Float           @default(0)
+  budgetTravel          Float           @default(0)
+  budgetContingency     Float           @default(0)
+  budgetTotal           Float           @default(0)
+
+  // Industry Partner
+  industryPartnerId     String?
+  industryPartner       IndustryPartner? @relation(fields: [industryPartnerId], references: [id])
+  industryPartnerName   String?
+
+  // Relations
+  milestones            ProjectMilestone[]
+
+  @@index([problemId])
+  @@index([heiId])
+  @@index([status])
+}
+
+model ProjectMilestone {
+  id                    String          @id @default(uuid())
+  proposalId            String
+  proposal              SolutionProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  title                 String
+  stage                 String
+  durationWeeks         Int
+  status                String          @default("pending")
+  deliverable           String
+  verificationEvidence  String?
+  completedDate         DateTime?
+  createdAt             DateTime        @default(now())
+
+  @@index([proposalId])
+}
+
+model Discussion {
+  id            String    @id @default(uuid())
+  problemId     String
+  problem       Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  senderId      String?
+  sender        User?     @relation(fields: [senderId], references: [id])
+  senderName    String
+  senderRole    String
+  message       String
+  avatarColor   String?
+  timestamp     DateTime  @default(now())
+
+  @@index([problemId])
+  @@index([timestamp])
+}
+
+model MediaAttachment {
+  id          String    @id @default(uuid())
+  problemId   String
+  problem     Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  url         String
+  type        String    @default("image") // image, video, document
+  filename    String?
+  sizeBytes   Int?
+  createdAt   DateTime  @default(now())
+
+  @@index([problemId])
+}
+
+model Notification {
+  id          String            @id @default(uuid())
+  type        String            @default("info")
+  title       String
+  message     String
+  targetRole  String            @default("All")
+  read        Boolean           @default(false)
+  actionUrl   String?
+  recipientId String?
+  recipient   User?             @relation("NotificationRecipient", fields: [recipientId], references: [id])
+  createdAt   DateTime          @default(now())
+
+  @@index([recipientId])
+  @@index([targetRole])
+  @@index([read])
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  problemId   String?
+  problem     Problem?  @relation(fields: [problemId], references: [id])
+  action      String    // e.g., "PROBLEM_CREATED", "HEI_ASSIGNED", "STATUS_UPDATED"
+  details     String?
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([action])
+  @@index([createdAt])
+}

@@ -1,0 +1,690 @@
+import React, { useState } from 'react';
+import {
+  GraduationCap,
+  Sparkles,
+  Users,
+  Plus,
+  Trash2,
+  FileText,
+  Send,
+  Loader2,
+  CheckCircle2,
+  Clock,
+  Layers,
+  Award,
+  ChevronRight,
+  IndianRupee,
+  Building2,
+  ExternalLink,
+} from 'lucide-react';
+import { ProblemStatement, University, SolutionProposal, ProjectMilestone } from '../types';
+
+interface UniversityModuleProps {
+  universities: University[];
+  problems: ProblemStatement[];
+  proposals: SolutionProposal[];
+  onSelectProblem: (problem: ProblemStatement) => void;
+  onSubmitProposal: (newProposal: any) => Promise<void>;
+  onUpdateMilestone: (proposalId: string, milestoneId: string, status: string) => Promise<void>;
+}
+
+export const UniversityModule: React.FC<UniversityModuleProps> = ({
+  universities,
+  problems,
+  proposals,
+  onSelectProblem,
+  onSubmitProposal,
+  onUpdateMilestone,
+}) => {
+  const [selectedHeiId, setSelectedHeiId] = useState<string>(universities[0]?.id || 'hei-bit-mesra');
+  const [activeSubTab, setActiveSubTab] = useState<'assigned' | 'proposals' | 'team-builder'>('assigned');
+  const [targetProblemForProposal, setTargetProblemForProposal] = useState<ProblemStatement | null>(null);
+
+  // Proposal Form State
+  const [isGeneratingAiProposal, setIsGeneratingAiProposal] = useState(false);
+  const [isSubmittingProposal, setIsSubmittingProposal] = useState(false);
+  const [customAiInstructions, setCustomAiInstructions] = useState('');
+  const [projectTitle, setProjectTitle] = useState('');
+  const [abstract, setAbstract] = useState('');
+  const [technologyMethodology, setTechnologyMethodology] = useState('');
+  const [leadFacultyName, setLeadFacultyName] = useState('');
+  const [leadFacultyDept, setLeadFacultyDept] = useState('');
+  const [studentLeadName, setStudentLeadName] = useState('');
+  const [studentLeadEmail, setStudentLeadEmail] = useState('');
+  const [studentDepts, setStudentDepts] = useState<string[]>(['Civil & Water Resources', 'IoT Engineering']);
+  const [nepCredits, setNepCredits] = useState<number>(6);
+  const [hardwareBudget, setHardwareBudget] = useState<number>(150000);
+  const [prototypingBudget, setPrototypingBudget] = useState<number>(100000);
+  const [fieldTestingBudget, setFieldTestingBudget] = useState<number>(70000);
+  const [travelBudget, setTravelBudget] = useState<number>(40000);
+  const [contingencyBudget, setContingencyBudget] = useState<number>(40000);
+  const [ipPotential, setIpPotential] = useState<any>('Patentable Technology');
+  const [milestones, setMilestones] = useState<ProjectMilestone[]>([
+    { id: 'm-1', title: 'Problem Diagnosis & Lab Formulation', stage: 'Lab Prototype', durationWeeks: 4, status: 'in_progress', deliverable: 'Bench test results and design specs' },
+    { id: 'm-2', title: 'Prototyping & Field Assembly', stage: 'Lab Prototype', durationWeeks: 4, status: 'pending', deliverable: 'Fully assembled prototype unit' },
+    { id: 'm-3', title: 'Village Field Trial & Community Testing', stage: 'Field Testing', durationWeeks: 6, status: 'pending', deliverable: 'Water/soil output verified on-ground' },
+    { id: 'm-4', title: 'Handover to Gram Panchayat & Training Manual', stage: 'Community Pilot', durationWeeks: 3, status: 'pending', deliverable: 'SOP and community training completed' },
+  ]);
+
+  const currentHei = universities.find((u) => u.id === selectedHeiId) || universities[0];
+  const assignedProblems = problems.filter((p) => p.assignedHeiId === selectedHeiId);
+  const heiProposals = proposals.filter((p) => p.heiId === selectedHeiId);
+
+  // Trigger server-side AI proposal generator
+  const handleGenerateAiProposal = async (problem: ProblemStatement) => {
+    setIsGeneratingAiProposal(true);
+    try {
+      const res = await fetch('/api/ai/generate-proposal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          problemId: problem.id,
+          heiId: currentHei.id,
+          customInstructions: customAiInstructions,
+        }),
+      });
+      const data = await res.json();
+      setProjectTitle(data.projectTitle || `Innovation Project: ${problem.title}`);
+      setAbstract(data.abstract || '');
+      setTechnologyMethodology(data.technologyMethodology || '');
+      if (data.facultyMentor) {
+        setLeadFacultyName(data.facultyMentor.name);
+        setLeadFacultyDept(data.facultyMentor.department);
+      }
+      if (data.studentTeam) {
+        setStudentLeadName(data.studentTeam.leadName);
+        setStudentLeadEmail(data.studentTeam.leadEmail);
+        if (data.studentTeam.departments) setStudentDepts(data.studentTeam.departments);
+      }
+      if (data.budgetBreakdown) {
+        setHardwareBudget(data.budgetBreakdown.hardwareEquip || 140000);
+        setPrototypingBudget(data.budgetBreakdown.prototyping || 100000);
+        setFieldTestingBudget(data.budgetBreakdown.fieldTesting || 60000);
+        setTravelBudget(data.budgetBreakdown.travelAndLogistics || 40000);
+        setContingencyBudget(data.budgetBreakdown.contingency || 40000);
+      }
+      if (data.milestones && data.milestones.length > 0) {
+        setMilestones(data.milestones);
+      }
+      if (data.ipPotential) {
+        setIpPotential(data.ipPotential);
+      }
+      if (data.nepExperientialCredits) {
+        setNepCredits(data.nepExperientialCredits);
+      }
+    } catch (err) {
+      console.error('Failed to generate AI proposal:', err);
+      alert('Could not run AI generator. You can draft manually.');
+    } finally {
+      setIsGeneratingAiProposal(false);
+    }
+  };
+
+  const handleStartProposal = (problem: ProblemStatement) => {
+    setTargetProblemForProposal(problem);
+    setActiveSubTab('team-builder');
+    // Prepopulate faculty
+    if (currentHei.facultyMentors && currentHei.facultyMentors.length > 0) {
+      setLeadFacultyName(currentHei.facultyMentors[0].name);
+      setLeadFacultyDept(currentHei.facultyMentors[0].department);
+    }
+    setProjectTitle(`Project ${problem.title.slice(0, 40)} Innovation`);
+  };
+
+  const handleSubmitProposalForm = async () => {
+    if (!targetProblemForProposal) return;
+    if (!projectTitle.trim() || !abstract.trim()) {
+      alert('Please provide project title and abstract.');
+      return;
+    }
+
+    setIsSubmittingProposal(true);
+    const totalAmount = hardwareBudget + prototypingBudget + fieldTestingBudget + travelBudget + contingencyBudget;
+
+    try {
+      const payload = {
+        problemId: targetProblemForProposal.id,
+        problemTitle: targetProblemForProposal.title,
+        heiId: currentHei.id,
+        heiName: currentHei.name,
+        projectTitle,
+        abstract,
+        technologyMethodology,
+        facultyMentor: {
+          name: leadFacultyName || currentHei.facultyMentors[0]?.name || 'Dr. Lead Faculty',
+          department: leadFacultyDept || currentHei.departments[0],
+          email: `${leadFacultyName.toLowerCase().replace(/\s+/g, '.')}@${currentHei.shortName.toLowerCase().replace(/[^a-z]/g, '')}.ac.in`,
+        },
+        studentTeam: {
+          leadName: studentLeadName || 'Student Innovation Lead',
+          leadEmail: studentLeadEmail || 'student.researcher@univ.ac.in',
+          membersCount: studentDepts.length + 2,
+          departments: studentDepts,
+        },
+        nepExperientialCredits: nepCredits,
+        budgetBreakdown: {
+          hardwareEquip: hardwareBudget,
+          prototyping: prototypingBudget,
+          fieldTesting: fieldTestingBudget,
+          travelAndLogistics: travelBudget,
+          contingency: contingencyBudget,
+          totalAmount,
+        },
+        milestones,
+        ipPotential,
+      };
+
+      await onSubmitProposal(payload);
+      setTargetProblemForProposal(null);
+      setActiveSubTab('proposals');
+      alert('Solution Proposal submitted successfully and dispatched for Industry/CSR partnership!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit proposal.');
+    } finally {
+      setIsSubmittingProposal(false);
+    }
+  };
+
+  return (
+    <div id="university-innovation-module" className="space-y-6">
+      {/* HEI Selector Header */}
+      <div className="bg-[#FAF7F2] border border-stone-300 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-[#1A1A1A] border border-stone-800 text-white flex items-center justify-center font-bold">
+            <GraduationCap className="w-8 h-8" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="editorial-meta">NEP 2020 HEI Portal</span>
+              <span className="text-stone-600">•</span>
+              <span className="text-[10px] font-mono text-stone-500 uppercase tracking-widest">
+                {currentHei.type} • Est. {currentHei.establishedYear}
+              </span>
+            </div>
+            <h2 className="font-editorial-serif italic text-2xl font-bold text-stone-900 leading-none">{currentHei.name}</h2>
+            <p className="text-xs text-stone-600 font-serif italic mt-1.5">
+              {currentHei.incubationCenter} • {currentHei.district} District
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-600">Switch Institution:</label>
+          <select
+            id="select-active-hei"
+            value={selectedHeiId}
+            onChange={(e) => {
+              setSelectedHeiId(e.target.value);
+              setTargetProblemForProposal(null);
+            }}
+            className="text-xs px-3 py-2 border border-stone-300 bg-white focus:outline-none focus:border-[#BC5434] text-stone-900"
+          >
+            {universities.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.shortName} ({u.district})
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Sub-Tabs */}
+      <div className="flex border-b border-stone-300 space-x-6 text-[11px] font-bold uppercase tracking-widest text-stone-500">
+        <button
+          onClick={() => setActiveSubTab('assigned')}
+          className={`pb-3 flex items-center gap-2 cursor-pointer transition-colors ${
+            activeSubTab === 'assigned'
+              ? 'border-b-2 border-[#BC5434] text-stone-900'
+              : 'hover:text-stone-900 border-b-2 border-transparent'
+          }`}
+        >
+          <span>Assigned Challenges</span>
+          <span className="px-1.5 py-0.5 bg-[#FAF7F2] text-stone-900 text-[10px] border border-stone-300">
+            {assignedProblems.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('proposals')}
+          className={`pb-3 flex items-center gap-2 cursor-pointer transition-colors ${
+            activeSubTab === 'proposals'
+              ? 'border-b-2 border-[#BC5434] text-stone-900'
+              : 'hover:text-stone-900 border-b-2 border-transparent'
+          }`}
+        >
+          <span>Submitted Proposals</span>
+          <span className="px-1.5 py-0.5 bg-[#FAF7F2] text-stone-900 text-[10px] border border-stone-300">
+            {heiProposals.length}
+          </span>
+        </button>
+
+        {targetProblemForProposal && (
+          <button
+            onClick={() => setActiveSubTab('team-builder')}
+            className={`pb-3 flex items-center gap-2 cursor-pointer transition-colors ${
+              activeSubTab === 'team-builder'
+              ? 'text-[#BC5434] border-b-2 border-[#BC5434]'
+              : 'text-[#BC5434]/70 hover:text-[#BC5434] border-b-2 border-transparent'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Draft Proposal ({targetProblemForProposal.trackingCode})</span>
+          </button>
+        )}
+      </div>
+
+      {/* Sub-Tab 1: Assigned Challenges */}
+      {activeSubTab === 'assigned' && (
+        <div className="space-y-4">
+          <div className="bg-[#FAF7F2] border border-[#BC5434] p-4 text-xs text-stone-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <strong className="text-[#BC5434] uppercase tracking-wider font-bold text-[10px] mr-2">NEP 2020 Action Mandate:</strong> 
+              <span className="font-serif italic">Constitute multidisciplinary faculty-student teams, assign research credits, and submit innovative technical proposals for on-ground testing.</span>
+            </div>
+            <div className="font-bold uppercase tracking-widest text-[10px] whitespace-nowrap">
+              {assignedProblems.length} Pending Actions
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {assignedProblems.map((prob) => (
+              <div
+                key={prob.id}
+                className="bg-white border border-stone-300 p-5 hover:border-stone-500 transition-all flex flex-col md:flex-row items-start justify-between gap-4"
+              >
+                <div className="space-y-2 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-[#1A1A1A] text-white">
+                      {prob.trackingCode}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FAF7F2] text-stone-900 border border-stone-300">
+                      Dept: {prob.assignedDepartment || currentHei.departments[0]}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FAF7F2] text-stone-900 border border-stone-300">
+                      {prob.district} • {prob.blockOrPanchayat}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-stone-200 text-stone-800">
+                      Status: {prob.status.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+
+                  <h3
+                    onClick={() => onSelectProblem(prob)}
+                    className="font-editorial-serif text-xl font-bold text-stone-900 hover:text-[#BC5434] cursor-pointer leading-snug mt-1"
+                  >
+                    {prob.title}
+                  </h3>
+
+                  <p className="text-xs text-stone-600 line-clamp-2 font-sans">{prob.description}</p>
+
+                  <div className="p-3 bg-[#FAF7F2] border border-stone-200 text-xs flex flex-wrap items-center justify-between gap-3 mt-3">
+                    <span className="text-stone-600 font-serif italic">
+                      <strong className="text-stone-900 not-italic uppercase tracking-wider text-[10px]">AI Taxonomy:</strong> {prob.aiAnalysis?.subCategory}
+                    </span>
+                    <span className="text-stone-600 font-serif italic">
+                      <strong className="text-stone-900 not-italic uppercase tracking-wider text-[10px]">Beneficiaries:</strong> {(prob.affectedPopulation || 0).toLocaleString()} citizens
+                    </span>
+                    <span className="text-[#BC5434] font-bold uppercase tracking-wider text-[10px]">
+                      Budget Band: {prob.aiAnalysis?.estimatedBudgetBand || '₹3.0 - ₹5.0 Lakhs'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 shrink-0 md:min-w-[200px]">
+                  <button
+                    id={`btn-constitute-team-${prob.id}`}
+                    onClick={() => handleStartProposal(prob)}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest px-4 py-3 cursor-pointer transition-colors"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Constitute Team</span>
+                  </button>
+
+                  <button
+                    onClick={() => onSelectProblem(prob)}
+                    className="w-full text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-900 py-2 border border-transparent hover:border-stone-300 cursor-pointer"
+                  >
+                    View Community Evidence
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {assignedProblems.length === 0 && (
+              <div className="bg-white border border-stone-300 p-8 text-center text-stone-500 font-serif italic text-sm">
+                No challenges currently routed to {currentHei.name}. Check the AI Triage tab to allocate incoming societal challenges.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Sub-Tab 2: Submitted Research Proposals */}
+      {activeSubTab === 'proposals' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            {heiProposals.map((prop) => (
+              <div
+                key={prop.id}
+                className="bg-white border border-stone-300 p-6 space-y-4"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-900 bg-[#FAF7F2] px-2 py-0.5 border border-stone-300 inline-block mb-2">
+                      NEP Experiential Credits: {prop.nepExperientialCredits}
+                    </span>
+                    <h3 className="font-editorial-serif italic text-2xl font-bold text-stone-900">{prop.projectTitle}</h3>
+                    <div className="text-xs text-stone-600 font-serif italic mt-1">
+                      Problem: <strong className="text-stone-900 not-italic uppercase tracking-wider text-[10px]">{prop.problemTitle}</strong>
+                    </div>
+                  </div>
+
+                  <div className="text-left md:text-right mt-2 md:mt-0">
+                    <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 bg-[#1A1A1A] text-white">
+                      {prop.status.replace(/_/g, ' ')}
+                    </span>
+                    <div className="text-sm font-bold text-stone-900 mt-2">
+                      ₹{(prop.budgetBreakdown.totalAmount / 100000).toFixed(2)} Lakhs
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-stone-600 leading-relaxed bg-[#FAF7F2] p-4 border border-stone-200 font-serif italic">
+                  {prop.abstract}
+                </p>
+
+                {/* Team & Faculty Details */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs p-4 border border-stone-200">
+                  <div>
+                    <div className="editorial-meta text-stone-500 mb-1">Faculty Mentor</div>
+                    <div className="font-bold text-stone-900">{prop.facultyMentor.name}</div>
+                    <div className="text-stone-600 font-serif italic mt-0.5">{prop.facultyMentor.department}</div>
+                  </div>
+                  <div>
+                    <div className="editorial-meta text-stone-500 mb-1">Student Team</div>
+                    <div className="font-bold text-stone-900">{prop.studentTeam.leadName} (Lead)</div>
+                    <div className="text-stone-600 font-serif italic mt-0.5">
+                      {prop.studentTeam.membersCount} Researchers ({prop.studentTeam.departments.join(', ')})
+                    </div>
+                  </div>
+                  <div>
+                    <div className="editorial-meta text-stone-500 mb-1">Industry Sponsor</div>
+                    <div className="font-bold text-[#BC5434]">
+                      {prop.industryPartnerName || 'Seeking CSR Sponsor'}
+                    </div>
+                    <div className="text-stone-600 font-serif italic mt-0.5">IP Potential: {prop.ipPotential}</div>
+                  </div>
+                </div>
+
+                {/* Milestones Roadmaps */}
+                <div className="pt-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-900 mb-3 flex items-center justify-between border-b border-stone-200 pb-2">
+                    <span>Execution Milestones ({prop.milestones.length})</span>
+                    <span className="text-stone-500">
+                      {prop.milestones.filter((m) => m.status === 'completed').length}/{prop.milestones.length} Completed
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {prop.milestones.map((m) => (
+                      <div
+                        key={m.id}
+                        className={`p-3 border text-xs ${
+                          m.status === 'completed'
+                            ? 'bg-stone-100 border-stone-300 text-stone-900'
+                            : m.status === 'in_progress'
+                            ? 'bg-white border-[#BC5434] text-stone-900'
+                            : 'bg-[#FAF7F2] border-stone-200 text-stone-500'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] uppercase font-bold tracking-widest">{m.stage}</span>
+                          <span
+                            onClick={() => {
+                              const nextStatus = m.status === 'completed' ? 'in_progress' : 'completed';
+                              onUpdateMilestone(prop.id, m.id, nextStatus);
+                            }}
+                            className={`cursor-pointer text-[10px] font-bold uppercase tracking-widest hover:underline ${
+                              m.status === 'completed' ? 'text-stone-900' : m.status === 'in_progress' ? 'text-[#BC5434]' : 'text-stone-400'
+                            }`}
+                          >
+                            {m.status === 'completed' ? '✓ Done' : m.status === 'in_progress' ? '● Active' : '○ Wait'}
+                          </span>
+                        </div>
+                        <div className="font-editorial-serif font-bold text-sm leading-tight mb-1">{m.title}</div>
+                        <div className="text-[10px] font-serif italic mt-2 text-stone-600">Deliverable: {m.deliverable}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {heiProposals.length === 0 && (
+              <div className="bg-white border border-stone-300 p-8 text-center text-stone-500 font-serif italic text-sm">
+                No solution proposals submitted yet for {currentHei.name}. Select an assigned challenge to begin drafting.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Sub-Tab 3: Multidisciplinary Team Constitutor & AI Proposal Draft */}
+      {activeSubTab === 'team-builder' && targetProblemForProposal && (
+        <div className="bg-white border border-stone-300 p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-stone-200">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FAF7F2] text-[#BC5434] border border-stone-300 mb-2">
+                <Sparkles className="w-3 h-3" />
+                <span>Multidisciplinary Team & NEP 2020 Formulator</span>
+              </div>
+              <h3 className="font-editorial-serif text-2xl font-bold text-stone-900 leading-snug">{targetProblemForProposal.title}</h3>
+              <p className="text-xs text-stone-600 font-serif italic mt-1">
+                {targetProblemForProposal.district} • {targetProblemForProposal.blockOrPanchayat}
+              </p>
+            </div>
+
+            {/* AI Generator Button */}
+            <button
+              id="btn-ai-generate-proposal"
+              onClick={() => handleGenerateAiProposal(targetProblemForProposal)}
+              disabled={isGeneratingAiProposal}
+              className="inline-flex items-center justify-center gap-2 bg-[#FAF7F2] hover:bg-white text-[#BC5434] border border-[#BC5434] text-[11px] font-bold uppercase tracking-widest px-6 py-3 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isGeneratingAiProposal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              <span>{isGeneratingAiProposal ? 'Generating...' : 'Generate AI Draft'}</span>
+            </button>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-5">
+            <div>
+              <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
+                Project Innovation Title <span className="text-[#BC5434]">*</span>
+              </label>
+              <input
+                id="input-proposal-title"
+                type="text"
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="e.g. Project Jal-Amrit: Low-Cost Solar Assisted Nano-Composite De-fluoridation"
+                className="w-full text-sm px-3 py-2.5 border border-stone-300 bg-white focus:outline-none focus:border-[#BC5434]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
+                Executive Abstract & Societal Value <span className="text-[#BC5434]">*</span>
+              </label>
+              <textarea
+                id="textarea-proposal-abstract"
+                rows={3}
+                value={abstract}
+                onChange={(e) => setAbstract(e.target.value)}
+                placeholder="Summarize the core technical innovation, targeted beneficiaries, and expected outcomes..."
+                className="w-full text-xs font-serif italic px-3 py-2.5 border border-stone-300 bg-white focus:outline-none focus:border-[#BC5434]"
+              ></textarea>
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
+                Technology Methodology & Implementation Steps
+              </label>
+              <textarea
+                rows={4}
+                value={technologyMethodology}
+                onChange={(e) => setTechnologyMethodology(e.target.value)}
+                placeholder="1. Material synthesis and bench testing... 2. IoT telemetry integration... 3. Village deployment... 4. Handover..."
+                className="w-full text-xs font-mono px-3 py-2.5 border border-stone-300 bg-[#FAF7F2] focus:outline-none focus:border-[#BC5434]"
+              ></textarea>
+            </div>
+
+            {/* Team Constitution */}
+            <div className="p-5 border border-stone-300 space-y-4">
+              <div className="text-[10px] uppercase font-bold tracking-wider text-stone-900 flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-200 pb-2">
+                <span className="flex items-center gap-2">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Innovation Team</span>
+                </span>
+                <span className="text-stone-500 font-serif italic lowercase tracking-normal mt-1 sm:mt-0">NEP 2020 Capstone / Experiential Learning</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">Lead Faculty Mentor</label>
+                  <input
+                    type="text"
+                    value={leadFacultyName}
+                    onChange={(e) => setLeadFacultyName(e.target.value)}
+                    placeholder="Dr. Mentor Name"
+                    className="w-full text-xs px-3 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">Student Lead Name</label>
+                  <input
+                    type="text"
+                    value={studentLeadName}
+                    onChange={(e) => setStudentLeadName(e.target.value)}
+                    placeholder="Student Lead Name"
+                    className="w-full text-xs px-3 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">NEP Academic Credits</label>
+                  <select
+                    value={nepCredits}
+                    onChange={(e) => setNepCredits(Number(e.target.value))}
+                    className="w-full text-xs px-3 py-2 border border-stone-300 bg-[#FAF7F2] font-bold text-stone-900"
+                  >
+                    <option value={4}>4 Credits (Minor Social Practicum)</option>
+                    <option value={6}>6 Credits (Final Year Capstone Project)</option>
+                    <option value={8}>8 Credits (Master Thesis / Innovation Fellowship)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Budget Breakdown */}
+            <div className="p-5 border border-stone-300 space-y-4">
+              <div className="text-[10px] uppercase font-bold tracking-wider text-stone-900 flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-200 pb-2">
+                <span className="flex items-center gap-2">
+                  <IndianRupee className="w-3.5 h-3.5" />
+                  <span>Budget Breakdown (INR)</span>
+                </span>
+                <span className="text-[#BC5434] font-bold mt-1 sm:mt-0">
+                  Total: ₹{((hardwareBudget + prototypingBudget + fieldTestingBudget + travelBudget + contingencyBudget) / 100000).toFixed(2)} Lakhs
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5 text-center">Hardware</label>
+                  <input
+                    type="number"
+                    value={hardwareBudget}
+                    onChange={(e) => setHardwareBudget(Number(e.target.value))}
+                    className="w-full text-xs text-center px-2 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5 text-center">Prototype</label>
+                  <input
+                    type="number"
+                    value={prototypingBudget}
+                    onChange={(e) => setPrototypingBudget(Number(e.target.value))}
+                    className="w-full text-xs text-center px-2 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5 text-center">Trials</label>
+                  <input
+                    type="number"
+                    value={fieldTestingBudget}
+                    onChange={(e) => setFieldTestingBudget(Number(e.target.value))}
+                    className="w-full text-xs text-center px-2 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5 text-center">Travel</label>
+                  <input
+                    type="number"
+                    value={travelBudget}
+                    onChange={(e) => setTravelBudget(Number(e.target.value))}
+                    className="w-full text-xs text-center px-2 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5 text-center">Contingency</label>
+                  <input
+                    type="number"
+                    value={contingencyBudget}
+                    onChange={(e) => setContingencyBudget(Number(e.target.value))}
+                    className="w-full text-xs text-center px-2 py-2 border border-stone-300 bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* IP Potential */}
+            <div>
+              <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
+                Intellectual Property & Commercialization Potential
+              </label>
+              <select
+                value={ipPotential}
+                onChange={(e) => setIpPotential(e.target.value as any)}
+                className="w-full text-xs px-3 py-2.5 border border-stone-300 bg-white"
+              >
+                <option value="Patentable Technology">Patentable Technology (Novel Process / Composition)</option>
+                <option value="Open-Source Public Good">Open-Source Public Good (Frugal Community Hardware)</option>
+                <option value="Grassroots Spinoff">Grassroots Startup Spinoff (Student Led Venture)</option>
+                <option value="Process Copyright">Process Copyright / Digital Platform</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-stone-200 mt-6">
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('assigned')}
+              className="px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-900 cursor-pointer text-center"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              id="btn-submit-solution-proposal"
+              onClick={handleSubmitProposalForm}
+              disabled={isSubmittingProposal}
+              className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] px-8 py-3 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {isSubmittingProposal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              <span>Submit Proposal & Open for Industry CSR</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
