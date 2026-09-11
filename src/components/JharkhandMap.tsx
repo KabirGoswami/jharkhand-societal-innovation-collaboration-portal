@@ -94,7 +94,7 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
 
     filter.append('feMorphology')
       .attr('operator', 'dilate')
-      .attr('radius', '0.3')
+      .attr('radius', '0.372')
       .attr('in', 'SourceAlpha')
       .attr('result', 'dilated');
 
@@ -200,8 +200,8 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
 
       // --- Render Institution Markers ---
       const allInstitutions = [
-        ...INITIAL_UNIVERSITIES.map(u => ({ ...u, type: 'university', color: '#3B82F6', iconLabel: 'University' })),
-        ...INITIAL_INDUSTRY_PARTNERS.map(i => ({ ...i, type: 'industry', color: '#10B981', iconLabel: 'Industry' })),
+        ...INITIAL_UNIVERSITIES.map(u => ({ ...u, type: 'university', color: '#78350F', iconLabel: 'University' })),
+        ...INITIAL_INDUSTRY_PARTNERS.map(i => ({ ...i, type: 'industry', color: '#B91C1C', iconLabel: 'Industry' })),
       ].filter((institution: any) => {
         const coords = institution.locationCoords;
         return coords && Number.isFinite(coords.lng) && Number.isFinite(coords.lat);

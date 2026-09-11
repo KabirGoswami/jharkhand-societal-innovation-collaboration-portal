@@ -120,7 +120,7 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict
           <div
             key={card.tab}
             onClick={() => setActiveTab(card.tab)}
-            className="group block p-6 bg-white border border-stone-200 transition-all duration-300 hover:border-[#BC5434] hover:shadow-sm cursor-pointer"
+            className={`group block p-6 bg-white border border-stone-200 transition-all duration-300 hover:border-[${card.color}] hover:shadow-sm cursor-pointer`}
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">

@@ -120,21 +120,21 @@ export const AIProblemManagement: React.FC<AIProblemManagementProps> = ({
 
           {/* Quick Stats Pills */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="bg-stone-900 border border-stone-800 p-3 min-w-[100px]">
-              <div className="font-editorial-serif text-2xl font-light text-white">{totalCount}</div>
-              <div className="text-[10px] text-stone-400 font-serif italic mt-1">Total Received</div>
+            <div className="bg-[#FAF7F2] border border-[#BC5434] p-3 min-w-[100px]">
+              <div className="font-editorial-serif text-2xl font-light text-[#BC5434]">{totalCount}</div>
+              <div className="text-[10px] text-stone-600 font-serif italic mt-1">Total Received</div>
             </div>
             <div className="bg-[#FAF7F2] border border-[#BC5434] p-3 min-w-[100px]">
               <div className="font-editorial-serif text-2xl font-light text-[#BC5434]">{unassignedCount}</div>
               <div className="text-[10px] text-stone-600 font-serif italic mt-1">Pending Route</div>
             </div>
-            <div className="bg-stone-900 border border-stone-800 p-3 min-w-[100px]">
-              <div className="font-editorial-serif text-2xl font-light text-white">{highPriorityCount}</div>
-              <div className="text-[10px] text-stone-400 font-serif italic mt-1">Critical &gt; 85</div>
+            <div className="bg-[#FAF7F2] border border-[#BC5434] p-3 min-w-[100px]">
+              <div className="font-editorial-serif text-2xl font-light text-[#BC5434]">{highPriorityCount}</div>
+              <div className="text-[10px] text-stone-600 font-serif italic mt-1">Critical &gt; 85</div>
             </div>
-            <div className="bg-stone-900 border border-stone-800 p-3 min-w-[100px]">
-              <div className="font-editorial-serif text-2xl font-light text-white">{duplicateAlertsCount}</div>
-              <div className="text-[10px] text-stone-400 font-serif italic mt-1">Dup Clusters</div>
+            <div className="bg-[#FAF7F2] border border-[#BC5434] p-3 min-w-[100px]">
+              <div className="font-editorial-serif text-2xl font-light text-[#BC5434]">{duplicateAlertsCount}</div>
+              <div className="text-[10px] text-stone-600 font-serif italic mt-1">Dup Clusters</div>
             </div>
           </div>
         </div>

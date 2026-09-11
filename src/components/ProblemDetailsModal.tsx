@@ -70,7 +70,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             <button
               onClick={handleUpvote}
               disabled={upvoting}
-              className="inline-flex items-center gap-1.5 bg-[#BC5434] hover:bg-[#A3452B] text-xs font-bold uppercase tracking-widest text-white px-3.5 py-1.5 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-[#BC5434] hover:bg-[#5C2A0B] text-xs font-bold uppercase tracking-widest text-white px-3.5 py-1.5 transition-colors cursor-pointer"
             >
               <ThumbsUp className="w-3.5 h-3.5" />
               <span>{problem.upvotesCount} Endorse</span>
