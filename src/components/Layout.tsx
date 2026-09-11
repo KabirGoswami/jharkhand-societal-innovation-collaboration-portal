@@ -1,0 +1,163 @@
+import React from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Loader2, Bell, MessageCircle } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
+import { useAppContext } from '../AppContext';
+import { NotificationPanel } from './NotificationPanel';
+import { ProblemDetailsModal } from './ProblemDetailsModal';
+
+export function Layout() {
+  const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
+  const {
+    isLoading,
+    isNotificationOpen,
+    setIsNotificationOpen,
+    notifications,
+    handleMarkNotificationRead,
+    handleMarkAllNotificationsRead,
+    unreadNotificationsCount,
+    selectedProblem,
+    setSelectedProblem,
+    activeProposalForSelectedProblem,
+    handleUpvote,
+    userRole,
+  } = useAppContext();
+
+  return (
+    <div className="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#BC5434]/20 selection:text-[#1A1A1A]">
+      {/* Language Toggle */}
+      <div className="fixed top-6 left-6 z-50">
+        <div
+          onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
+          className="group relative w-20 h-9 bg-stone-200 rounded-full p-1 cursor-pointer transition-all duration-300 hover:bg-stone-300 shadow-sm border border-stone-300"
+          title={t('language_toggle')}
+        >
+          {/* Sliding Pill */}
+          <div
+            className={`absolute top-1 left-1 w-9 h-7 rounded-full shadow-sm transition-all duration-300 ease-in-out transform ${
+              language === 'en'
+                ? 'translate-x-0 bg-white'
+                : 'translate-x-9 bg-[#BC5434]'
+            }`}
+          />
+
+          {/* Labels */}
+          <div className="relative z-10 flex justify-between items-center h-full px-2 text-[10px] font-bold uppercase tracking-wider">
+            <span className={`transition-colors duration-300 ${language === 'en' ? 'text-stone-900' : 'text-stone-500'}`}>
+              EN
+            </span>
+            <span className={`transition-colors duration-300 ${language === 'hi' ? 'text-white' : 'text-stone-500'}`}>
+              हिंदी
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Global Notification Trigger */}
+      <div className="fixed top-6 right-6 z-50">
+        <button
+          onClick={() => setIsNotificationOpen(true)}
+          className="relative p-3 bg-white border border-stone-200 text-stone-500 hover:text-[#BC5434] hover:border-[#BC5434] rounded-full shadow-md transition-all duration-200 cursor-pointer active:scale-90"
+          title={t('notifications')}
+        >
+          <Bell className="w-6 h-6" />
+          {unreadNotificationsCount > 0 && (
+            <span className="absolute top-2 right-2 w-3 h-3 bg-[#BC5434] rounded-full border-2 border-white"></span>
+          )}
+        </button>
+      </div>
+
+      {/* Global Chat/Forum Trigger */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => navigate('/communication')}
+          className="relative p-4 bg-[#BC5434] text-white rounded-full shadow-xl hover:bg-[#A3452B] transition-all duration-200 cursor-pointer active:scale-90 group"
+          title="Community Forum"
+        >
+          <MessageCircle className="w-7 h-7" />
+          {/* Simple pulse effect if there are unread notifications */}
+          {unreadNotificationsCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+          )}
+          {/* Tooltip on hover */}
+          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-stone-900 text-white text-[10px] font-medium leading-tight rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-normal w-48 text-center">
+            Join multidisciplinary discussions between students, experts, and grassroots reporters.
+          </span>
+        </button>
+      </div>
+
+      <NotificationPanel
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        notifications={notifications}
+        onMarkAsRead={handleMarkNotificationRead}
+        onMarkAllAsRead={handleMarkAllNotificationsRead}
+        onOpenCommunicationHub={() => {
+          setIsNotificationOpen(false);
+          navigate('/communication');
+        }}
+      />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-28 text-stone-600">
+            <Loader2 className="w-8 h-8 animate-spin text-[#BC5434] mb-3" />
+            <p className="text-base font-editorial-serif italic font-bold text-stone-900">{t('connecting_registry')}</p>
+            <p className="text-xs uppercase tracking-widest text-stone-500 mt-1">{t('syncing_nodes')}</p>
+          </div>
+        ) : (
+          <Outlet />
+        )}
+      </main>
+
+      {/* Problem Details & Collaboration Modal */}
+      <ProblemDetailsModal
+        problem={selectedProblem}
+        proposal={activeProposalForSelectedProblem}
+        onClose={() => setSelectedProblem(null)}
+        onUpvote={handleUpvote}
+        currentUserRole={userRole}
+      />
+
+      {/* Footer */}
+      <footer className="bg-[#1A1A1A] text-stone-400 border-t border-stone-800 text-xs py-10 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-stone-800 text-center md:text-left">
+            <div>
+              <div className="flex items-center justify-center md:justify-start gap-2.5 text-stone-100 font-bold text-base">
+                <span className="font-editorial-serif italic text-xl text-white">Samadhan.JH</span>
+                <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#BC5434] border-l border-stone-700 pl-2">
+                  {t('footer_title')}
+                </span>
+              </div>
+              <p className="text-xs text-stone-400 mt-1 font-serif italic max-w-xl">
+                {t('footer_desc')}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] font-bold uppercase tracking-wider">
+              <span className="text-[#E07A5F]">24 Districts</span>
+              <span className="text-stone-700">•</span>
+              <span className="text-stone-300">6 Premier Jharkhand HEIs</span>
+              <span className="text-stone-700">•</span>
+              <span className="text-stone-300">CSR MCA Section 135 Compliant</span>
+            </div>
+          </div>
+
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-stone-500">
+            <div>
+              &copy; {new Date().getFullYear()} Department of Higher & Technical Education, Government of Jharkhand.
+            </div>
+            <div className="text-stone-400 font-serif italic">
+              Academic Nodes: BIT Mesra • IIT (ISM) Dhanbad • Birsa Agricultural University • NIT Jamshedpur • AIIMS Deoghar • Central University of Jharkhand
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
