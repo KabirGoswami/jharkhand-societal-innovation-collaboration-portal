@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --paper: #FDFCFB;
+    --paper-tint: #FAF7F2;
+    --paper-muted: #F3EFEA;
+    --ink: #1A1A1A;
+    --accent: #BC5434;
+    --accent-hover: #A3452B;
+    --muted: #7A7A7A;
+    --border: rgba(26, 26, 26, 0.12);
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+.font-editorial-serif {
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+}
+
+.editorial-meta {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #BC5434;
+}
+
+.editorial-stat-card {
+  border-top: 1px solid #1A1A1A;
+  padding-top: 14px;
+}
+
+.editorial-tag {
+  border: 1px solid #1A1A1A;
+  border-radius: 9999px;
+  padding: 3px 12px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+/* Custom scrollbar for editorial elegance */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF7F2;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8D2CA;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BC5434;
+}
+

@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { AnalyticsSummary, University, ProblemStatement } from '../types';
 import { THEMATIC_DOMAINS } from '../data/jharkhandData';
-import { JharkhandMap } from './JharkhandMap';
 
 interface AnalyticsDashboardProps {
   analytics: AnalyticsSummary;
@@ -35,19 +34,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [selectedSortBy, setSelectedSortBy] = useState<'challenges' | 'active'>('challenges');
 
   // Sorted districts
-  const sortedDistricts = React.useMemo(() => {
-    const stats = analytics?.districtStats || [];
-    return [...stats].sort((a, b) => {
-      if (selectedSortBy === 'challenges') {
-        return (b?.challengesCount || 0) - (a?.challengesCount || 0);
-      }
-      return (b?.activeProjects || 0) - (a?.activeProjects || 0);
-    });
-  }, [analytics?.districtStats, selectedSortBy]);
+  const sortedDistricts = [...analytics.districtStats].sort((a, b) => {
+    if (selectedSortBy === 'challenges') {
+      return b.challengesCount - a.challengesCount;
+    }
+    return b.activeProjects - a.activeProjects;
+  });
 
   // Calculate maximum challenges for proportional bars
-  const maxDistrictChallenges = Math.max(...(analytics?.districtStats || []).map((d) => d?.challengesCount || 0), 1);
-  const maxDomainCount = Math.max(...(analytics?.domainStats || []).map((d) => d?.count || 0), 1);
+  const maxDistrictChallenges = Math.max(...analytics.districtStats.map((d) => d.challengesCount), 1);
+  const maxDomainCount = Math.max(...analytics.domainStats.map((d) => d.count), 1);
 
   return (
     <div id="visual-analytics-module" className="space-y-6">
@@ -80,37 +76,37 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-stone-900 shadow-none">
           <div className="editorial-meta !text-[10px] !mb-1">Challenges Logged</div>
-          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.totalChallengesReceived ?? 0}</div>
+          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics.totalChallengesReceived}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">100% Geo-tagged</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-[#BC5434] shadow-none">
           <div className="editorial-meta !text-[10px] !mb-1">Routed to HEIs</div>
-          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.totalAssignedToHEIs ?? 0}</div>
-          <div className="text-[10px] text-stone-500 font-serif italic mt-1">{analytics?.facultyMentorsEngaged ?? 0} Faculty Mentors</div>
+          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics.totalAssignedToHEIs}</div>
+          <div className="text-[10px] text-stone-500 font-serif italic mt-1">{analytics.facultyMentorsEngaged} Faculty Mentors</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-stone-900 shadow-none">
           <div className="editorial-meta !text-[10px] !mb-1">Active Prototypes</div>
-          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.activePrototypes ?? 0}</div>
+          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics.activePrototypes}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">In Univ Incubation Labs</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-[#BC5434] shadow-none">
           <div className="editorial-meta !text-[10px] !mb-1">Field Pilots</div>
-          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.fieldPilotsDeployed ?? 0}</div>
+          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics.fieldPilotsDeployed}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">Deployed in Districts</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-stone-900 shadow-none">
           <div className="editorial-meta !text-[10px] !mb-1">CSR Pledged</div>
-          <div className="font-editorial-serif text-3xl font-light text-stone-900">₹{(analytics?.totalFundingPledgedLakhs ?? 0).toFixed(0)}L</div>
+          <div className="font-editorial-serif text-3xl font-light text-stone-900">₹{analytics.totalFundingPledgedLakhs.toFixed(0)}L</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">Corporate & MSME Grants</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-[#BC5434] shadow-none">
           <div className="editorial-meta !text-[10px] !mb-1">Students in NEP</div>
-          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.studentsParticipating ?? 0}</div>
+          <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics.studentsParticipating}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">Experiential Credits</div>
         </div>
       </div>
@@ -169,26 +165,27 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       {/* Dual Charts: Thematic Domains & Geographic Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Thematic Domain Distribution */}
-        <div className="bg-white border border-stone-300 p-6 shadow-none flex flex-col justify-between lg:col-span-1">
+        <div className="bg-white border border-stone-300 p-6 shadow-none flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-5 border-b border-stone-200 pb-3">
               <h3 className="font-editorial-serif italic text-lg font-bold text-stone-900">
                 Thematic Domain Breakdown
               </h3>
+              <span className="editorial-meta !text-[10px] !mb-0">By Received Challenges</span>
             </div>
 
             <div className="space-y-4">
-              {(analytics?.domainStats || []).map((ds) => {
+              {analytics.domainStats.map((ds) => {
                 const domainDef = THEMATIC_DOMAINS.find((t) => t.key === ds.domain);
-                const percent = Math.round(((ds?.count || 0) / maxDomainCount) * 100);
+                const percent = Math.round((ds.count / maxDomainCount) * 100);
 
                 return (
                   <div key={ds.domain} className="text-xs">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="font-bold text-stone-900">
-                        {domainDef?.label || (ds.domain || 'general').replace('_', ' ').toUpperCase()}
+                        {domainDef?.label || ds.domain.replace('_', ' ').toUpperCase()}
                       </span>
                       <div className="flex items-center gap-2">
                         <span className="text-stone-600 font-mono text-[11px]">{ds.count} logged</span>
@@ -197,7 +194,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                         </span>
                       </div>
                     </div>
-
 
                     <div className="w-full bg-stone-100 h-2 overflow-hidden border border-stone-200">
                       <div
@@ -212,13 +208,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
         </div>
 
-        {/* Geographic Distribution: 24 Districts of Jharkhand with Map */}
-        <div className="bg-white border border-stone-300 p-6 shadow-none flex flex-col justify-between lg:col-span-2">
+        {/* Geographic Distribution: 24 Districts of Jharkhand */}
+        <div className="bg-white border border-stone-300 p-6 shadow-none flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-5 border-b border-stone-200 pb-3">
               <div>
                 <h3 className="font-editorial-serif italic text-lg font-bold text-stone-900">
-                  District Ledger & Spatial Heatmap
+                  District Ledger & Heatmap
                 </h3>
                 <span className="text-[11px] text-stone-500 font-serif italic">Across all 24 administrative districts</span>
               </div>
@@ -244,41 +240,37 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="flex flex-col gap-6">
-              {/* District List */}
-              <div className="w-full max-h-[500px] overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-3">
-                {sortedDistricts.map((d, index) => {
-                  const percent = Math.round(((d?.challengesCount || 0) / maxDistrictChallenges) * 100);
-                  return (
-                    <div
-                      key={d?.district}
-                      onClick={() => onSelectDistrictFilter && onSelectDistrictFilter(d?.district)}
-                      className="p-3 bg-[#FAF7F2] hover:bg-stone-100 border border-stone-300 transition-colors cursor-pointer text-xs"
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[11px] text-stone-500 w-5">{index + 1}.</span>
-                          <span className="font-bold text-stone-900">{d?.district}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-stone-700 font-mono text-[11px]">{d?.challengesCount} challenges</span>
-                          <span className="text-[10px] px-2 py-0.5 border border-stone-400 bg-white text-stone-900 font-bold uppercase">
-                            {d?.activeProjects} active
-                          </span>
-                        </div>
+            <div className="max-h-[380px] overflow-y-auto pr-2 space-y-2">
+              {sortedDistricts.map((d, index) => {
+                const percent = Math.round((d.challengesCount / maxDistrictChallenges) * 100);
+                return (
+                  <div
+                    key={d.district}
+                    onClick={() => onSelectDistrictFilter && onSelectDistrictFilter(d.district)}
+                    className="p-3 bg-[#FAF7F2] hover:bg-stone-100 border border-stone-300 transition-colors cursor-pointer text-xs"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[11px] text-stone-500 w-5">{index + 1}.</span>
+                        <span className="font-bold text-stone-900">{d.district}</span>
                       </div>
-
-
-                      <div className="w-full bg-stone-200 h-1.5 overflow-hidden">
-                        <div
-                          className="bg-[#BC5434] h-full transition-all duration-300"
-                          style={{ width: `${percent}%` }}
-                        ></div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-stone-700 font-mono text-[11px]">{d.challengesCount} challenges</span>
+                        <span className="text-[10px] px-2 py-0.5 border border-stone-400 bg-white text-stone-900 font-bold uppercase">
+                          {d.activeProjects} active
+                        </span>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+
+                    <div className="w-full bg-stone-200 h-1.5 overflow-hidden">
+                      <div
+                        className="bg-[#BC5434] h-full transition-all duration-300"
+                        style={{ width: `${percent}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -307,8 +299,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 Incubation: <strong className="text-stone-900 not-italic font-sans">{u.incubationCenter}</strong> ({u.district})
               </div>
               <div className="pt-2 border-t border-stone-200 flex justify-between text-[11px] font-mono text-stone-600">
-                <span>Depts: <strong>{u.departments?.length || 0}</strong></span>
-                <span>Mentors: <strong>{u.facultyMentors?.length || 0}</strong></span>
+                <span>Depts: <strong>{u.departments.length}</strong></span>
+                <span>Mentors: <strong>{u.facultyMentors.length}</strong></span>
               </div>
             </div>
           ))}

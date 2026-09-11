@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Search,
   Plus,
@@ -26,7 +27,6 @@ interface CitizenModuleProps {
   onUpvote: (problemId: string) => Promise<void>;
   trackingFilterCode?: string;
   onClearTrackingFilter?: () => void;
-  onSearchTrackingCode: (code: string) => void;
 }
 
 export const CitizenModule: React.FC<CitizenModuleProps> = ({
@@ -36,13 +36,20 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
   onUpvote,
   trackingFilterCode,
   onClearTrackingFilter,
-  onSearchTrackingCode,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [trackingQuery, setTrackingQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedDomain, setSelectedDomain] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const districtParam = searchParams.get('district');
+    if (districtParam) {
+      setSelectedDistrict(districtParam);
+    }
+  }, [searchParams]);
 
   // Filter problems
   const filteredProblems = problems.filter((p) => {
@@ -55,18 +62,13 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const match =
-        (p.title || '').toLowerCase().includes(q) ||
-        (p.description || '').toLowerCase().includes(q) ||
-        (p.trackingCode || '').toLowerCase().includes(q) ||
-        (p.blockOrPanchayat || '').toLowerCase().includes(q);
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.trackingCode.toLowerCase().includes(q) ||
+        p.blockOrPanchayat.toLowerCase().includes(q);
       if (!match) return false;
     }
     return true;
-  }).sort((a, b) => {
-    const order: Record<string, number> = { Critical: 1, High: 2, Medium: 3, Low: 4 };
-    const valA = order[a.urgency] || 5;
-    const valB = order[b.urgency] || 5;
-    return valA - valB;
   });
 
   return (
@@ -83,9 +85,6 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
             <h2 className="font-editorial-serif italic text-2xl sm:text-3xl font-bold tracking-tight text-white">
               Citizen & Panchayati Raj Problem Statements
             </h2>
-            <p className="text-xs text-stone-400 font-serif italic max-w-2xl mt-2 leading-relaxed">
-              Submit local water, agriculture, healthcare, or municipal issues. Our platform connects them with faculty researchers, multidisciplinary student teams, and corporate CSR co-developers across Jharkhand.
-            </p>
           </div>
 
           <button
@@ -126,27 +125,9 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
           <div className="relative min-w-[220px] flex-1 max-w-xs">
             <input
               type="text"
-              placeholder="Search challenges, keywords..."
+              placeholder="Search challenges, keywords, Panchayats..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs pl-8 pr-3 py-2 border border-stone-300 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#BC5434]"
-            />
-            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5" />
-          </div>
-
-          {/* Tracking ID Search Field */}
-          <div className="relative min-w-[220px] flex-1 max-w-xs">
-            <input
-              type="text"
-              placeholder="Track Challenge ID (e.g. JH-RNC...)"
-              value={trackingQuery}
-              onChange={(e) => setTrackingQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  onSearchTrackingCode(trackingQuery.trim());
-                  setTrackingQuery('');
-                }
-              }}
               className="w-full text-xs pl-8 pr-3 py-2 border border-stone-300 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#BC5434]"
             />
             <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5" />
@@ -206,7 +187,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
         {filteredProblems.map((prob) => {
           const photoUrl =
             prob.mediaUrls?.[0] ||
-            '/placeholder-image.jpg';
+            'https://images.unsplash.com/photo-1541888946425-d0fbb18086f7?auto=format&fit=crop&w=600&q=80';
 
           return (
             <div
@@ -250,9 +231,9 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                 <div className="p-5 space-y-2.5">
                   <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-stone-500">
                     <span className="text-[#BC5434]">
-                      {(prob.domain || 'general').replace('_', ' ')}
+                      {prob.domain.replace('_', ' ')}
                     </span>
-                    <span>{prob.blockOrPanchayat || ''}</span>
+                    <span>{prob.blockOrPanchayat}</span>
                   </div>
 
                   <h3

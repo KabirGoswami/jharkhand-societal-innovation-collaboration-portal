@@ -88,7 +88,7 @@ const HOME_CARDS: HomeCard[] = [
   },
 ];
 
-function HomeView({ setActiveTab, onOpenSubmitModal, analytics }: { setActiveTab: (tab: any) => void, onOpenSubmitModal: () => void, analytics: any }) {
+function HomeView({ setActiveTab, onOpenSubmitModal }: { setActiveTab: (tab: any) => void, onOpenSubmitModal: () => void }) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Hero Section */}
@@ -113,14 +113,7 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics }: { setActiveTab
           </button>
 
           <div className="relative w-full max-w-4xl">
-            <JharkhandMap
-              districtStats={analytics?.districtStats || []}
-              onSelectDistrict={(district) => {
-                setActiveTab('challenges');
-                // Note: We might want to add a filter here,
-                // but for now just navigating to challenges.
-              }}
-            />
+            <JharkhandMap />
           </div>
         </div>
       </header>
@@ -411,7 +404,6 @@ export default function App() {
               <HomeView
                 setActiveTab={setActiveTab}
                 onOpenSubmitModal={() => setIsSubmitModalOpen(true)}
-                analytics={analytics}
               />
             )}
 
@@ -433,7 +425,6 @@ export default function App() {
                     onUpvote={handleUpvote}
                     trackingFilterCode={trackingFilterCode}
                     onClearTrackingFilter={() => setTrackingFilterCode('')}
-                    onSearchTrackingCode={handleSearchTrackingCode}
                   />
                 )}
 
