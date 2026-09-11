@@ -152,6 +152,7 @@ export interface University {
   logoUrl?: string;
   establishedYear: number;
   website: string;
+  locationCoords: LocationCoords;
 }
 
 export interface IndustryPartner {
@@ -166,6 +167,7 @@ export interface IndustryPartner {
   description: string;
   pilotTestSites: string[];
   contactPerson: string;
+  locationCoords: LocationCoords;
 }
 
 export interface ProjectMilestone {

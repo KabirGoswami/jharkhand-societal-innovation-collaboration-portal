@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Plus,
@@ -27,6 +27,8 @@ interface CitizenModuleProps {
   trackingFilterCode?: string;
   onClearTrackingFilter?: () => void;
   onSearchTrackingCode: (code: string) => void;
+  mapFilter?: { type: 'district' | 'university' | 'industry'; value: string } | null;
+  onClearMapFilter?: () => void;
 }
 
 export const CitizenModule: React.FC<CitizenModuleProps> = ({
@@ -37,6 +39,8 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
   trackingFilterCode,
   onClearTrackingFilter,
   onSearchTrackingCode,
+  mapFilter,
+  onClearMapFilter,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [trackingQuery, setTrackingQuery] = useState('');
@@ -44,11 +48,30 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
   const [selectedDomain, setSelectedDomain] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
+  // Sync mapFilter with internal state
+  useEffect(() => {
+    if (mapFilter?.type === 'district') {
+      setSelectedDistrict(mapFilter.value);
+    } else {
+      // If we're coming from a non-district map filter,
+      // we don't want to overwrite the district filter unless it's 'all'
+      // but for simplicity, let's just keep the current internal state.
+    }
+  }, [mapFilter]);
+
   // Filter problems
   const filteredProblems = problems.filter((p) => {
     if (trackingFilterCode && p.trackingCode.toLowerCase() !== trackingFilterCode.toLowerCase()) {
       return false;
     }
+
+    // Apply mapFilter if present
+    if (mapFilter) {
+      if (mapFilter.type === 'district' && p.district !== mapFilter.value) return false;
+      if (mapFilter.type === 'university' && p.assignedHeiId !== mapFilter.value) return false;
+      if (mapFilter.type === 'industry' && p.partnerIndustryId !== mapFilter.value) return false;
+    }
+
     if (selectedDistrict !== 'all' && p.district !== selectedDistrict) return false;
     if (selectedDomain !== 'all' && p.domain !== selectedDomain) return false;
     if (selectedStatus !== 'all' && p.status !== selectedStatus) return false;
@@ -100,22 +123,44 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
       </div>
 
       {/* Tracking Filter Pill if active */}
-      {trackingFilterCode && (
+      {(trackingFilterCode || mapFilter) && (
         <div className="bg-[#FAF7F2] border border-stone-300 px-4 py-3 flex items-center justify-between text-xs text-stone-900">
-          <div className="flex items-center gap-2">
-            <span className="editorial-meta !mb-0">Tracking Challenge:</span>
-            <span className="font-mono font-bold text-stone-900 bg-white px-2 py-0.5 border border-stone-400">
-              {trackingFilterCode}
-            </span>
+          <div className="flex items-center gap-4">
+            {trackingFilterCode && (
+              <div className="flex items-center gap-2">
+                <span className="editorial-meta !mb-0">Tracking Challenge:</span>
+                <span className="font-mono font-bold text-stone-900 bg-white px-2 py-0.5 border border-stone-400">
+                  {trackingFilterCode}
+                </span>
+              </div>
+            )}
+            {mapFilter && (
+              <div className="flex items-center gap-2">
+                <span className="editorial-meta !mb-0">Filtered by:</span>
+                <span className="font-bold text-stone-900 bg-white px-2 py-0.5 border border-stone-400 capitalize">
+                  {mapFilter.type} ({mapFilter.value})
+                </span>
+              </div>
+            )}
           </div>
-          {onClearTrackingFilter && (
-            <button
-              onClick={onClearTrackingFilter}
-              className="text-xs font-bold uppercase tracking-wider text-[#BC5434] hover:text-[#A3452B] underline cursor-pointer"
-            >
-              Show all challenges
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {onClearTrackingFilter && trackingFilterCode && (
+              <button
+                onClick={onClearTrackingFilter}
+                className="text-xs font-bold uppercase tracking-wider text-[#BC5434] hover:text-[#A3452B] underline cursor-pointer"
+              >
+                Clear Tracking
+              </button>
+            )}
+            {onClearMapFilter && mapFilter && (
+              <button
+                onClick={onClearMapFilter}
+                className="text-xs font-bold uppercase tracking-wider text-[#BC5434] hover:text-[#A3452B] underline cursor-pointer"
+              >
+                Clear Map Filter
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -180,25 +225,26 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
             ))}
           </select>
 
-          {/* Status */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="text-xs px-3 py-2 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:border-[#BC5434]"
-          >
-            <option value="all">All Statuses</option>
-            <option value="submitted">Submitted</option>
-            <option value="ai_evaluated">AI Evaluated</option>
-            <option value="assigned_to_hei">Routed to University</option>
-            <option value="prototype_ready">Prototype Ready</option>
-            <option value="field_testing">Field Testing</option>
-            <option value="deployed">Deployed in Community</option>
-          </select>
         </div>
 
-        <div className="text-xs font-serif italic text-stone-600">
-          Showing <strong className="font-bold text-stone-900 not-italic">{filteredProblems.length}</strong> community challenges
-        </div>
+        {/* Status */}
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="text-xs px-3 py-2 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:border-[#BC5434]"
+        >
+          <option value="all">All Statuses</option>
+          <option value="submitted">Submitted</option>
+          <option value="ai_evaluated">AI Evaluated</option>
+          <option value="assigned_to_hei">Routed to University</option>
+          <option value="prototype_ready">Prototype Ready</option>
+          <option value="field_testing">Field Testing</option>
+          <option value="deployed">Deployed in Community</option>
+        </select>
+      </div>
+
+      <div className="text-xs font-serif italic text-stone-600 text-right">
+        Showing <strong className="font-bold text-stone-900 not-italic">{filteredProblems.length}</strong> community challenges
       </div>
 
       {/* Problem Cards Grid */}

@@ -92,7 +92,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             <span>•</span>
             <span className="font-medium text-stone-700">{problem.blockOrPanchayat}</span>
             <span>•</span>
-            <span>Submitted by: <strong className="text-stone-900">{problem.submittedBy.name}</strong> ({problem.submittedBy.type.replace('_', ' ')})</span>
+            <span>Submitted by: <strong className="text-stone-900">{problem.submittedBy?.name || 'Unknown'}</strong> ({problem.submittedBy?.type?.replace('_', ' ') || 'Unknown'})</span>
           </div>
         </div>
 
@@ -190,9 +190,9 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                     <span>Geo-Location Coordinates</span>
                   </div>
                   <div className="text-stone-900 font-mono font-bold">
-                    Lat: {problem.locationCoords.lat}, Lng: {problem.locationCoords.lng}
+                    Lat: {problem.locationCoords?.lat ?? 'N/A'}, Lng: {problem.locationCoords?.lng ?? 'N/A'}
                   </div>
-                  <div className="text-[11px] text-stone-600 font-serif italic mt-1">{problem.locationCoords.address}</div>
+                  <div className="text-[11px] text-stone-600 font-serif italic mt-1">{problem.locationCoords?.address || 'Address not provided'}</div>
                 </div>
 
                 <div>
@@ -304,16 +304,16 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="p-3.5 bg-white border border-stone-300">
                       <div className="editorial-meta !text-[10px] !mb-1">Assigned Faculty Mentor</div>
-                      <div className="font-bold text-stone-900">{proposal.facultyMentor.name}</div>
-                      <div className="text-stone-600 text-[11px]">{proposal.facultyMentor.department}</div>
-                      <div className="text-stone-500 font-mono text-[10px]">{proposal.facultyMentor.email}</div>
+                      <div className="font-bold text-stone-900">{proposal.facultyMentor?.name || 'Unknown Mentor'}</div>
+                      <div className="text-stone-600 text-[11px]">{proposal.facultyMentor?.department || 'Unknown Department'}</div>
+                      <div className="text-stone-500 font-mono text-[10px]">{proposal.facultyMentor?.email || 'No email provided'}</div>
                     </div>
 
                     <div className="p-3.5 bg-white border border-stone-300">
                       <div className="editorial-meta !text-[10px] !mb-1">Student Research Team</div>
-                      <div className="font-bold text-stone-900">{proposal.studentTeam.leadName} (Lead)</div>
-                      <div className="text-stone-600 text-[11px]">{proposal.studentTeam.membersCount} Multidisciplinary Members</div>
-                      <div className="text-stone-500 text-[10px]">{proposal.studentTeam.departments.join(', ')}</div>
+                      <div className="font-bold text-stone-900">{proposal.studentTeam?.leadName || 'Unknown Lead'} (Lead)</div>
+                      <div className="text-stone-600 text-[11px]">{proposal.studentTeam?.membersCount || 0} Multidisciplinary Members</div>
+                      <div className="text-stone-500 text-[10px]">{proposal.studentTeam?.departments?.join(', ') || 'No departments listed'}</div>
                     </div>
                   </div>
 
@@ -322,7 +322,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                     <div>
                       <div className="editorial-meta !text-[10px] !mb-1">Total Prototype Budget</div>
                       <div className="font-editorial-serif text-2xl font-light text-stone-900">
-                        ₹{(proposal.budgetBreakdown.totalAmount / 100000).toFixed(2)} Lakhs
+                        ₹{((proposal.budgetBreakdown?.totalAmount || 0) / 100000).toFixed(2)} Lakhs
                       </div>
                     </div>
                     <div className="text-right">
@@ -337,7 +337,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                       Milestones Roadmap
                     </h4>
                     <div className="space-y-2">
-                      {proposal.milestones.map((m) => (
+                      {proposal.milestones?.map((m) => (
                         <div key={m.id} className="p-3 bg-white border border-stone-300 flex justify-between items-center text-xs">
                           <div>
                             <div className="font-bold text-stone-900">{m.title}</div>
@@ -378,7 +378,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
         {/* Modal Footer */}
         <div className="bg-[#FAF7F2] px-6 py-3.5 border-t border-stone-300 flex items-center justify-between text-xs">
           <span className="text-stone-500 font-serif italic">
-            Registered: {new Date(problem.createdAt).toLocaleDateString()}
+            Registered: {new Date(problem.createdAt || Date.now()).toLocaleDateString()}
           </span>
           <button
             onClick={onClose}

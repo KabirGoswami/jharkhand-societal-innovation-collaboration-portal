@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CitizenModule } from './components/CitizenModule';
-import { CitizenSubmissionModal } from './components/CitizenSubmissionModal';
+import { CitizenSubmissionView } from './components/CitizenSubmissionView';
 import { AIProblemManagement } from './components/AIProblemManagement';
 import { UniversityModule } from './components/UniversityModule';
 import { IndustryModule } from './components/IndustryModule';
@@ -18,7 +18,7 @@ import {
   SolutionProposal,
   SystemNotification
 } from './types';
-import { Loader2, Sparkles, Building2, Briefcase, GraduationCap, Compass, Users, Layers, BarChart3, Plus, ArrowLeft } from 'lucide-react';
+import { Loader2, Sparkles, Building2, Briefcase, GraduationCap, Compass, Users, Layers, BarChart3, Plus, ArrowLeft, Bell, MessageCircle } from 'lucide-react';
 
 interface HomeCard {
   title: string;
@@ -39,6 +39,14 @@ const HOME_CARDS: HomeCard[] = [
     icon: Compass,
   },
   {
+    title: 'AI Triage System',
+    description: 'Our intelligent engine matching challenges to the best-suited HEI and industry partner.',
+    tab: 'ai-triage',
+    tag: ' Intelligence ',
+    stat: '94% Match Accuracy',
+    icon: Sparkles,
+  },
+  {
     title: 'University Hub',
     description: 'Connect with academic institutions and faculty mentors specializing in regional innovation.',
     tab: 'university',
@@ -55,22 +63,6 @@ const HOME_CARDS: HomeCard[] = [
     icon: Briefcase,
   },
   {
-    title: 'Impact Analytics',
-    description: 'Quantifiable metrics on how innovation is transforming lives in tribal and rural blocks.',
-    tab: 'analytics',
-    tag: ' Data ',
-    stat: '184k+ Lives Impacted',
-    icon: BarChart3,
-  },
-  {
-    title: 'Community Forum',
-    description: 'Join multidisciplinary discussions between students, experts, and grassroots reporters.',
-    tab: 'communication',
-    tag: ' Discourse ',
-    stat: '1.2k Active Threads',
-    icon: Users,
-  },
-  {
     title: 'Project Lifecycle',
     description: 'Track the journey from problem validation to prototyping and field deployment.',
     tab: 'lifecycle',
@@ -79,16 +71,16 @@ const HOME_CARDS: HomeCard[] = [
     icon: Layers,
   },
   {
-    title: 'AI Triage System',
-    description: 'Our intelligent engine matching challenges to the best-suited HEI and industry partner.',
-    tab: 'ai-triage',
-    tag: ' Intelligence ',
-    stat: '94% Match Accuracy',
-    icon: Sparkles,
+    title: 'Impact Analytics',
+    description: 'Quantifiable metrics on how innovation is transforming lives in tribal and rural blocks.',
+    tab: 'analytics',
+    tag: ' Data ',
+    stat: '184k+ Lives Impacted',
+    icon: BarChart3,
   },
 ];
 
-function HomeView({ setActiveTab, onOpenSubmitModal, analytics }: { setActiveTab: (tab: any) => void, onOpenSubmitModal: () => void, analytics: any }) {
+function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict, onSelectInstitution }: { setActiveTab: (tab: any) => void, onOpenSubmitModal: () => void, analytics: any, onSelectDistrict: (district: string) => void, onSelectInstitution: (inst: any) => void }) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Hero Section */}
@@ -115,11 +107,8 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics }: { setActiveTab
           <div className="relative w-full max-w-4xl">
             <JharkhandMap
               districtStats={analytics?.districtStats || []}
-              onSelectDistrict={(district) => {
-                setActiveTab('challenges');
-                // Note: We might want to add a filter here,
-                // but for now just navigating to challenges.
-              }}
+              onSelectDistrict={onSelectDistrict}
+              onSelectInstitution={onSelectInstitution}
             />
           </div>
         </div>
@@ -172,7 +161,7 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics }: { setActiveTab
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
-    'home' | 'challenges' | 'ai-triage' | 'university' | 'industry' | 'lifecycle' | 'analytics' | 'communication'
+    'home' | 'challenges' | 'ai-triage' | 'university' | 'industry' | 'lifecycle' | 'analytics' | 'communication' | 'submit-challenge'
   >('home');
   const [userRole, setUserRole] = useState<'citizen' | 'university' | 'industry' | 'admin'>('citizen');
 
@@ -185,10 +174,10 @@ export default function App() {
   const [notifications, setNotifications] = useState<SystemNotification[]>([]);
 
   // Modals & Selection
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<ProblemStatement | null>(null);
   const [trackingFilterCode, setTrackingFilterCode] = useState<string>('');
+  const [mapFilter, setMapFilter] = useState<{ type: 'district' | 'university' | 'industry'; value: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initial Data Fetching from server APIs
@@ -384,7 +373,41 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#BC5434]/20 selection:text-[#1A1A1A]">
-      {/* Navbar is removed as per request */}
+      {/* Global Notification Trigger */}
+      <div className="fixed top-6 right-6 z-50">
+        <button
+          onClick={() => setIsNotificationOpen(true)}
+          className="relative p-3 bg-white border border-stone-200 text-stone-500 hover:text-[#BC5434] hover:border-[#BC5434] rounded-full shadow-md transition-all duration-200 cursor-pointer active:scale-90"
+          title="Notifications"
+        >
+          <Bell className="w-6 h-6" />
+          {unreadNotificationsCount > 0 && (
+            <span className="absolute top-2 right-2 w-3 h-3 bg-[#BC5434] rounded-full border-2 border-white"></span>
+          )}
+        </button>
+      </div>
+
+      {/* Global Chat/Forum Trigger */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => setActiveTab('communication')}
+          className="relative p-4 bg-[#BC5434] text-white rounded-full shadow-xl hover:bg-[#A3452B] transition-all duration-200 cursor-pointer active:scale-90 group"
+          title="Community Forum"
+        >
+          <MessageCircle className="w-7 h-7" />
+          {/* Simple pulse effect if there are unread notifications */}
+          {unreadNotificationsCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+          )}
+          {/* Tooltip on hover */}
+          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-stone-900 text-white text-[10px] font-medium leading-tight rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-normal w-48 text-center">
+            Join multidisciplinary discussions between students, experts, and grassroots reporters.
+          </span>
+        </button>
+      </div>
 
       <NotificationPanel
         isOpen={isNotificationOpen}
@@ -410,30 +433,65 @@ export default function App() {
             {activeTab === 'home' && (
               <HomeView
                 setActiveTab={setActiveTab}
-                onOpenSubmitModal={() => setIsSubmitModalOpen(true)}
+                onOpenSubmitModal={() => setActiveTab('submit-challenge')}
                 analytics={analytics}
+                onSelectDistrict={(district) => {
+                  setMapFilter({ type: 'district', value: district });
+                  setActiveTab('challenges');
+                }}
+                onSelectInstitution={(inst) => {
+                  setMapFilter({ type: inst.type, value: inst.id });
+                  setActiveTab('challenges');
+                }}
               />
             )}
 
             {activeTab !== 'home' && (
               <div className="space-y-6">
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#BC5434] hover:text-[#A3452B] transition-colors cursor-pointer mb-4"
-                >
-                  <ArrowLeft className="w-3 h-3" />
-                  <span>Back to Home</span>
-                </button>
+                <div className="flex items-center justify-start mb-4">
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#BC5434] hover:text-[#A3452B] transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    <span>Back to Home</span>
+                  </button>
+                </div>
 
                 {activeTab === 'challenges' && (
                   <CitizenModule
                     problems={problems}
-                    onOpenSubmitModal={() => setIsSubmitModalOpen(true)}
+                    onOpenSubmitModal={() => setActiveTab('submit-challenge')}
                     onSelectProblem={(p) => setSelectedProblem(p)}
                     onUpvote={handleUpvote}
                     trackingFilterCode={trackingFilterCode}
-                    onClearTrackingFilter={() => setTrackingFilterCode('')}
+                    onClearTrackingFilter={() => {
+                      setTrackingFilterCode('');
+                      setMapFilter(null);
+                    }}
                     onSearchTrackingCode={handleSearchTrackingCode}
+                    mapFilter={mapFilter}
+                    onClearMapFilter={() => setMapFilter(null)}
+                  />
+                )}
+
+                {activeTab === 'submit-challenge' && (
+                  <CitizenSubmissionView
+                    onNavigateBack={() => setActiveTab('home')}
+                    onSuccess={(newProblem) => {
+                      const normalizedProblem = {
+                        ...newProblem,
+                        mediaUrls: newProblem.mediaAttachments && newProblem.mediaAttachments.length > 0
+                          ? newProblem.mediaAttachments.map((a: any) => a.url)
+                          : newProblem.mediaUrls || [],
+                      };
+                      setProblems((prev) => [normalizedProblem, ...prev]);
+                      fetch('/api/analytics')
+                        .then((r) => r.json())
+                        .then((d) => setAnalytics(d))
+                        .catch(() => {});
+                      setActiveTab('challenges');
+                    }}
                   />
                 )}
 
@@ -503,25 +561,6 @@ export default function App() {
           </div>
         )}
       </main>
-
-      {/* Citizen Submission Modal */}
-      <CitizenSubmissionModal
-        isOpen={isSubmitModalOpen}
-        onClose={() => setIsSubmitModalOpen(false)}
-        onSuccess={(newProblem) => {
-          const normalizedProblem = {
-            ...newProblem,
-            mediaUrls: newProblem.mediaAttachments && newProblem.mediaAttachments.length > 0
-              ? newProblem.mediaAttachments.map((a: any) => a.url)
-              : newProblem.mediaUrls || [],
-          };
-          setProblems((prev) => [normalizedProblem, ...prev]);
-          fetch('/api/analytics')
-            .then((r) => r.json())
-            .then((d) => setAnalytics(d))
-            .catch(() => {});
-        }}
-      />
 
       {/* Problem Details & Collaboration Modal */}
       <ProblemDetailsModal

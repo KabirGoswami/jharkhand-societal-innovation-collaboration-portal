@@ -25,7 +25,7 @@ export const CommunicationHub: React.FC<CommunicationHubProps> = ({
   userRole,
   onViewProblemDetails
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'inbox' | 'discussions'>('inbox');
+  const [activeSubTab, setActiveSubTab] = useState<'inbox' | 'discussions'>('discussions');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Map user role for UI

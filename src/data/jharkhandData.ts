@@ -60,6 +60,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-101', name: 'Dr. Sudeshna Mukherjee', designation: 'Professor', department: 'Civil & Water Resources', email: 'smukherjee@bitmesra.ac.in', specialization: 'Groundwater Contaminant Hydrology & Geo-filtration' },
       { id: 'fm-102', name: 'Dr. Anand Kumar Verma', designation: 'Associate Professor', department: 'Electronics & IoT', email: 'akverma@bitmesra.ac.in', specialization: 'Embedded Sensor Networks & Drone Telemetry' },
     ],
+    locationCoords: { lat: 23.425, lng: 85.445 },
   },
   {
     id: 'hei-iit-ism-dhanbad',
@@ -79,6 +80,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-201', name: 'Dr. Biswajit Paul', designation: 'Head of Centre', department: 'Environmental Science & Engg', email: 'bpaul@iitism.ac.in', specialization: 'Mine Fire Suppression, Fugitive Dust Control & Tailings Treatment' },
       { id: 'fm-202', name: 'Dr. Srikant Senapati', designation: 'Professor', department: 'Applied Geophysics', email: 'ssenapati@iitism.ac.in', specialization: 'Deep Aquifer Electrical Resistivity & Subsidence Modeling' },
     ],
+    locationCoords: { lat: 23.794, lng: 86.443 },
   },
   {
     id: 'hei-bau-ranchi',
@@ -98,6 +100,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-301', name: 'Dr. Rameshwar Oraon', designation: 'Chief Agronomist', department: 'Agronomy & Soil Science', email: 'roraon@bauranchi.org', specialization: 'Acid Soil Amelioration & Millets Farming in Jharkhand Uplands' },
       { id: 'fm-302', name: 'Dr. Pragya Kispotta', designation: 'Associate Professor', department: 'Horticulture & Post-Harvest', email: 'pkispotta@bauranchi.org', specialization: 'Solar Dehydration & Non-Timber Forest Produce Value Addition' },
     ],
+    locationCoords: { lat: 23.350, lng: 85.270 },
   },
   {
     id: 'hei-nit-jamshedpur',
@@ -117,6 +120,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-401', name: 'Dr. Arvind Kumar Sahu', designation: 'Professor', department: 'Mechanical & Automation', email: 'asahu@nitjsr.ac.in', specialization: 'Low-cost Agro-machinery & Assistive Mobility Prototypes' },
       { id: 'fm-402', name: 'Dr. Shalini Srivastava', designation: 'Associate Professor', department: 'Civil & Environmental', email: 'ssrivastava@nitjsr.ac.in', specialization: 'Heavy Metal Slag Utilization in Paving & Industrial Water Recirculation' },
     ],
+    locationCoords: { lat: 22.750, lng: 86.202 },
   },
   {
     id: 'hei-cuj-ranchi',
@@ -135,6 +139,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
     facultyMentors: [
       { id: 'fm-501', name: 'Dr. Alok Kumar Gupta', designation: 'Professor', department: 'Energy Engineering', email: 'akgupta@cuj.ac.in', specialization: 'Decentralized Solar Thermal Storage & Micro-hydel Systems' },
     ],
+    locationCoords: { lat: 23.410, lng: 85.310 },
   },
   {
     id: 'hei-aiims-deoghar',
@@ -153,6 +158,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
     facultyMentors: [
       { id: 'fm-601', name: 'Dr. Saurabh Pandey', designation: 'Addl Professor', department: 'Community Medicine & Family Health', email: 'spandey@aiimsdeoghar.edu.in', specialization: 'Maternal Nutrition, Sickle Cell Anemia Diagnostics & Tribal Telemedicine' },
     ],
+    locationCoords: { lat: 24.492, lng: 86.700 },
   },
   {
     id: 'hei-skmu-dumka',
@@ -171,6 +177,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
     facultyMentors: [
       { id: 'fm-701', name: 'Dr. Nirmal Murmu', designation: 'Head of Department', department: 'Zoology & Sericulture', email: 'nmurmu@skmu.ac.in', specialization: 'Organic Tussar Silk Cultivation, Cocoon Reeling & Disease Prevention' },
     ],
+    locationCoords: { lat: 24.273, lng: 87.287 },
   },
   {
     id: 'hei-rims-ranchi',
@@ -189,6 +196,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
     facultyMentors: [
       { id: 'fm-801', name: 'Dr. Vivek Kashyap', designation: 'Professor & Head', department: 'Preventive & Social Medicine', email: 'vkashyap@rimsranchi.ac.in', specialization: 'Vector-borne Disease Surveillance & Arsenic Biomonitoring' },
     ],
+    locationCoords: { lat: 23.330, lng: 85.310 },
   },
 ];
 
@@ -205,6 +213,7 @@ export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
     description: 'Leading CSR initiatives in Kolhan & Chotanagpur, supporting rural drinking water solutions, model tribal schools, and livelihood value chains.',
     pilotTestSites: ['Potka Block', 'Noamundi Mining Belt', 'Gamharia Industrial Zone'],
     contactPerson: 'Amitabh Sharma (Head - Grassroots Innovation & CSR)',
+    locationCoords: { lat: 22.810, lng: 86.210 },
   },
   {
     id: 'ind-bccl-coal-india',
@@ -218,6 +227,7 @@ export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
     description: 'Committed to ecological restoration of mined-out land, mine water treatment for drinking/irrigation, and mine fire mitigation technology.',
     pilotTestSites: ['Jharia Fire Belt', 'Katras Eco-Reclamation Zone', 'Kusunda Siltation Lake'],
     contactPerson: 'R. K. Srivastava (Chief Manager - CSR & Sustainability)',
+    locationCoords: { lat: 23.815, lng: 86.465 },
   },
   {
     id: 'ind-cmpdi',
@@ -231,6 +241,7 @@ export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
     description: 'Government R&D enterprise specializing in remote sensing, geohydrology, solar rooftop engineering, and environmental baseline auditing.',
     pilotTestSites: ['Kanke Aquifer Testing Grounds', 'Ramgarh Open-cast Basin'],
     contactPerson: 'Dr. S. K. Roy (General Manager - Remote Sensing & Environment)',
+    locationCoords: { lat: 23.360, lng: 85.320 },
   },
   {
     id: 'ind-jslps-palash',
@@ -244,6 +255,7 @@ export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
     description: 'Nodal rural development agency empowering 2.5 lakh women self-help groups (SHGs) under the flagship Palash brand across 260 blocks.',
     pilotTestSites: ['Torpa Rural Cluster (Khunti)', 'Murhu Lac Hub', 'Bundu Tomato Belt'],
     contactPerson: 'Sunita Soren (State Program Manager - Non-Farm Livelihoods)',
+    locationCoords: { lat: 23.400, lng: 85.370 },
   },
   {
     id: 'ind-sail-bokaro',
@@ -257,6 +269,7 @@ export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
     description: 'Supporting skill development, slag-based construction aggregate recycling, and rural health clinics across Bokaro and Ramgarh districts.',
     pilotTestSites: ['Chas Municipal Ward 14', 'Balidih Industrial Cluster'],
     contactPerson: 'P. K. Mishra (DGM - Town Administration & CSR)',
+    locationCoords: { lat: 23.646, lng: 86.151 },
   },
   {
     id: 'ind-bioharvest-startup',
@@ -270,6 +283,7 @@ export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
     description: 'Agri-tech startup developing micro-cold storage rooms powered by solar-biomass hybrid systems for smallholder tribal farmers.',
     pilotTestSites: ['Ormanjhi Vegetable Belt', 'Bero Organic Mandi'],
     contactPerson: 'Aniket Tripathy (Co-founder & CTO)',
+    locationCoords: { lat: 23.370, lng: 85.390 },
   },
 ];
 
