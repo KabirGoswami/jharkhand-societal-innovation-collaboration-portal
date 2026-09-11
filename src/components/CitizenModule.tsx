@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ProblemStatement, District, DomainTheme } from '../types';
 import { JHARKHAND_DISTRICTS, THEMATIC_DOMAINS } from '../data/jharkhandData';
+import { useLanguage } from '../LanguageContext';
 
 interface CitizenModuleProps {
   problems: ProblemStatement[];
@@ -42,6 +43,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
   mapFilter,
   onClearMapFilter,
 }) => {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [trackingQuery, setTrackingQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
@@ -99,15 +101,15 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="editorial-meta">Grassroots Problem Registry</span>
+              <span className="editorial-meta">{t('citizen_registry_title')}</span>
               <span className="text-stone-600">•</span>
-              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest">Statewide Index</span>
+              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest">{t('citizen_registry_index')}</span>
             </div>
             <h2 className="font-editorial-serif italic text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              Citizen & Panchayati Raj Problem Statements
+              {t('citizen_registry_header')}
             </h2>
             <p className="text-xs text-stone-400 font-serif italic max-w-2xl mt-2 leading-relaxed">
-              Submit local water, agriculture, healthcare, or municipal issues. Our platform connects them with faculty researchers, multidisciplinary student teams, and corporate CSR co-developers across Jharkhand.
+              {t('citizen_registry_desc')}
             </p>
           </div>
 
@@ -117,7 +119,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
             className="inline-flex items-center justify-center gap-2 bg-[#BC5434] hover:bg-[#A3452B] text-white text-xs font-bold uppercase tracking-widest px-6 py-3.5 transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>Submit a Challenge</span>
+            <span>{t('citizen_submit_btn')}</span>
           </button>
         </div>
       </div>
@@ -128,7 +130,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
           <div className="flex items-center gap-4">
             {trackingFilterCode && (
               <div className="flex items-center gap-2">
-                <span className="editorial-meta !mb-0">Tracking Challenge:</span>
+                <span className="editorial-meta !mb-0">{t('citizen_tracking_label')}</span>
                 <span className="font-mono font-bold text-stone-900 bg-white px-2 py-0.5 border border-stone-400">
                   {trackingFilterCode}
                 </span>
@@ -136,7 +138,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
             )}
             {mapFilter && (
               <div className="flex items-center gap-2">
-                <span className="editorial-meta !mb-0">Filtered by:</span>
+                <span className="editorial-meta !mb-0">{t('citizen_filter_label')}</span>
                 <span className="font-bold text-stone-900 bg-white px-2 py-0.5 border border-stone-400 capitalize">
                   {mapFilter.type} ({mapFilter.value})
                 </span>
@@ -149,7 +151,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                 onClick={onClearTrackingFilter}
                 className="text-xs font-bold uppercase tracking-wider text-[#BC5434] hover:text-[#A3452B] underline cursor-pointer"
               >
-                Clear Tracking
+                {t('citizen_clear_tracking')}
               </button>
             )}
             {onClearMapFilter && mapFilter && (
@@ -157,7 +159,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                 onClick={onClearMapFilter}
                 className="text-xs font-bold uppercase tracking-wider text-[#BC5434] hover:text-[#A3452B] underline cursor-pointer"
               >
-                Clear Map Filter
+                {t('citizen_clear_map')}
               </button>
             )}
           </div>
@@ -171,7 +173,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
           <div className="relative min-w-[220px] flex-1 max-w-xs">
             <input
               type="text"
-              placeholder="Search challenges, keywords..."
+              placeholder={t('citizen_search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full text-xs pl-8 pr-3 py-2 border border-stone-300 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#BC5434]"
@@ -183,7 +185,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
           <div className="relative min-w-[220px] flex-1 max-w-xs">
             <input
               type="text"
-              placeholder="Track Challenge ID (e.g. JH-RNC...)"
+              placeholder={t('citizen_tracking_placeholder')}
               value={trackingQuery}
               onChange={(e) => setTrackingQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -203,7 +205,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
             onChange={(e) => setSelectedDistrict(e.target.value)}
             className="text-xs px-3 py-2 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:border-[#BC5434]"
           >
-            <option value="all">All 24 Districts</option>
+            <option value="all">{t('citizen_all_districts')}</option>
             {JHARKHAND_DISTRICTS.map((d) => (
               <option key={d} value={d}>
                 {d}
@@ -217,14 +219,13 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
             onChange={(e) => setSelectedDomain(e.target.value)}
             className="text-xs px-3 py-2 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:border-[#BC5434]"
           >
-            <option value="all">All Domains</option>
+            <option value="all">{t('citizen_all_domains')}</option>
             {THEMATIC_DOMAINS.map((td) => (
               <option key={td.key} value={td.key}>
                 {td.label}
               </option>
             ))}
           </select>
-
         </div>
 
         {/* Status */}
@@ -233,18 +234,18 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
           onChange={(e) => setSelectedStatus(e.target.value)}
           className="text-xs px-3 py-2 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:border-[#BC5434]"
         >
-          <option value="all">All Statuses</option>
-          <option value="submitted">Submitted</option>
-          <option value="ai_evaluated">AI Evaluated</option>
-          <option value="assigned_to_hei">Routed to University</option>
-          <option value="prototype_ready">Prototype Ready</option>
-          <option value="field_testing">Field Testing</option>
-          <option value="deployed">Deployed in Community</option>
+          <option value="all">{t('citizen_all_statuses')}</option>
+          <option value="submitted">{t('citizen_status_submitted')}</option>
+          <option value="ai_evaluated">{t('citizen_status_ai_evaluated')}</option>
+          <option value="assigned_to_hei">{t('citizen_status_assigned')}</option>
+          <option value="prototype_ready">{t('citizen_status_prototype')}</option>
+          <option value="field_testing">{t('citizen_status_testing')}</option>
+          <option value="deployed">{t('citizen_status_deployed')}</option>
         </select>
       </div>
 
       <div className="text-xs font-serif italic text-stone-600 text-right">
-        Showing <strong className="font-bold text-stone-900 not-italic">{filteredProblems.length}</strong> community challenges
+        {t('citizen_showing_count').replace('%', filteredProblems.length.toString())}
       </div>
 
       {/* Problem Cards Grid */}
@@ -287,7 +288,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                           : 'bg-stone-200 text-stone-800'
                       }`}
                     >
-                      {prob.urgency} Urgency
+                      {prob.urgency} {t('citizen_urgency')}
                     </span>
                   </div>
                 </div>
@@ -315,7 +316,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-stone-500 text-[11px] flex items-center gap-1">
                         <Sparkles className="w-3 h-3 text-[#BC5434]" />
-                        <span>AI Priority Score:</span>
+                        <span>{t('citizen_ai_score')}</span>
                       </span>
                       <span className="font-editorial-serif font-bold text-sm text-stone-900">
                         {prob.aiAnalysis?.priorityScore || 85}/100
@@ -325,10 +326,10 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-stone-500 text-[11px] flex items-center gap-1">
                         <Building2 className="w-3 h-3 text-stone-500" />
-                        <span>Assigned HEI:</span>
+                        <span>{t('citizen_assigned_hei')}</span>
                       </span>
                       <span className="font-semibold text-stone-800 text-[11px] truncate max-w-[150px]">
-                        {prob.assignedHeiName || 'Pending Triage'}
+                        {prob.assignedHeiName || t('citizen_pending_triage')}
                       </span>
                     </div>
                   </div>
@@ -343,7 +344,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                   className="inline-flex items-center gap-1.5 text-stone-700 hover:text-[#BC5434] font-bold uppercase tracking-wider text-[10px] cursor-pointer transition-colors"
                 >
                   <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>{prob.upvotesCount} Endorse</span>
+                  <span>{prob.upvotesCount} {t('citizen_endorse')}</span>
                 </button>
 
                 <button
@@ -351,7 +352,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
                   onClick={() => onSelectProblem(prob)}
                   className="inline-flex items-center gap-1 text-[#BC5434] hover:text-stone-900 font-bold uppercase tracking-widest text-[11px] cursor-pointer transition-colors"
                 >
-                  <span>Full Details</span>
+                  <span>{t('citizen_full_details')}</span>
                   <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
@@ -361,13 +362,13 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
 
         {filteredProblems.length === 0 && (
           <div className="col-span-full py-16 bg-white border border-stone-300 text-center p-8">
-            <p className="font-editorial-serif italic text-base text-stone-600 mb-3">No challenges match your active search or filters.</p>
+            <p className="font-editorial-serif italic text-base text-stone-600 mb-3">{t('citizen_no_results')}</p>
             <button
               onClick={onOpenSubmitModal}
               className="inline-flex items-center gap-2 bg-[#BC5434] hover:bg-[#A3452B] text-white text-xs font-bold uppercase tracking-widest px-5 py-2.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Submit this as a New Challenge</span>
+              <span>{t('citizen_submit_new')}</span>
             </button>
           </div>
         )}

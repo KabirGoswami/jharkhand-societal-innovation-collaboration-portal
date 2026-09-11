@@ -10,6 +10,7 @@ import { ProblemDetailsModal } from './components/ProblemDetailsModal';
 import { NotificationPanel } from './components/NotificationPanel';
 import { CommunicationHub } from './components/CommunicationHub';
 import { JharkhandMap } from './components/JharkhandMap';
+import { useLanguage } from './LanguageContext';
 import {
   ProblemStatement,
   AnalyticsSummary,
@@ -18,7 +19,7 @@ import {
   SolutionProposal,
   SystemNotification
 } from './types';
-import { Loader2, Sparkles, Building2, Briefcase, GraduationCap, Compass, Users, Layers, BarChart3, Plus, ArrowLeft, Bell, MessageCircle } from 'lucide-react';
+import { Loader2, Sparkles, Building2, Briefcase, GraduationCap, Compass, Users, Layers, BarChart3, Plus, ArrowLeft, Bell, MessageCircle, Languages } from 'lucide-react';
 
 interface HomeCard {
   title: string;
@@ -80,19 +81,18 @@ const HOME_CARDS: HomeCard[] = [
   },
 ];
 
-function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict, onSelectInstitution }: { setActiveTab: (tab: any) => void, onOpenSubmitModal: () => void, analytics: any, onSelectDistrict: (district: string) => void, onSelectInstitution: (inst: any) => void }) {
+function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict, onSelectInstitution, t }: { setActiveTab: (tab: any) => void, onOpenSubmitModal: () => void, analytics: any, onSelectDistrict: (district: string) => void, onSelectInstitution: (inst: any) => void, t: (key: string) => string }) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Hero Section */}
       <header className="text-center mb-16">
-        <span className="editorial-meta block mb-4">Jharkhand State Initiative</span>
+        <span className="editorial-meta block mb-4">{t('initiative')}</span>
         <h1 className="font-editorial-serif text-5xl md:text-7xl font-bold tracking-tight mb-6 text-[#1A1A1A]">
-          Societal Innovation <br />
-          <span className="text-[#BC5434]">Collaboration Portal</span>
+          {t('title').split(' ').slice(0, -2).join(' ')} <br />
+          <span className="text-[#BC5434]">{t('title').split(' ').slice(-2).join(' ')}</span>
         </h1>
         <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-12 font-light">
-          A multidisciplinary ecosystem bridging the gap between grassroots challenges,
-          academic excellence, and industrial support to drive regional transformation.
+          {t('subtitle')}
         </p>
 
         <div className="flex flex-col items-center gap-8">
@@ -101,7 +101,7 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict
             className="inline-flex items-center gap-2 bg-[#BC5434] hover:bg-[#A3452B] text-white text-sm font-bold uppercase tracking-[0.2em] px-8 py-4 shadow-lg transition-all duration-300 cursor-pointer active:scale-95 mb-4"
           >
             <Plus className="w-5 h-5" />
-            <span>Submit a Grassroots Challenge</span>
+            <span>{t('submit_challenge')}</span>
           </button>
 
           <div className="relative w-full max-w-4xl">
@@ -116,43 +116,50 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict
 
       {/* Navigation Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {HOME_CARDS.map((card) => (
-          <div
-            key={card.tab}
-            onClick={() => setActiveTab(card.tab)}
-            className={`group block p-6 bg-white border border-stone-200 transition-all duration-300 hover:border-[${card.color}] hover:shadow-sm cursor-pointer`}
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#FAF7F2] border border-stone-200 group-hover:bg-[#BC5434] group-hover:text-white transition-all duration-300">
-                  <card.icon className="w-4 h-4" />
+        {HOME_CARDS.map((card) => {
+          const translationKey = card.tab === 'challenges' ? 'challenge_registry' :
+                               card.tab === 'ai-triage' ? 'ai_triage' :
+                               card.tab === 'university' ? 'university_hub' :
+                               card.tab === 'industry' ? 'industry_partners' :
+                               card.tab === 'lifecycle' ? 'project_lifecycle' : 'impact_analytics';
+          return (
+            <div
+              key={card.tab}
+              onClick={() => setActiveTab(card.tab)}
+              className="group block p-6 bg-white border border-stone-200 transition-all duration-300 hover:border-[#BC5434] hover:shadow-sm cursor-pointer"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#FAF7F2] border border-stone-200 group-hover:bg-[#BC5434] group-hover:text-white transition-all duration-300">
+                    <card.icon className="w-4 h-4" />
+                  </div>
+                  <span className="editorial-tag group-hover:bg-[#BC5434] group-hover:text-white transition-all duration-300">
+                    {t(translationKey + '_tag')}
+                  </span>
                 </div>
-                <span className="editorial-tag group-hover:bg-[#BC5434] group-hover:text-white transition-all duration-300">
-                  {card.tag}
+              </div>
+              <h3 className="font-editorial-serif text-2xl font-bold mb-3 group-hover:text-[#BC5434] transition-colors">
+                {t(translationKey)}
+              </h3>
+              <p className="text-stone-600 text-sm leading-relaxed mb-8">
+                {t(translationKey + '_desc')}
+              </p>
+              <div className="editorial-stat-card">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#1A1A1A]">
+                  {t(translationKey + '_stat')}
                 </span>
               </div>
             </div>
-            <h3 className="font-editorial-serif text-2xl font-bold mb-3 group-hover:text-[#BC5434] transition-colors">
-              {card.title}
-            </h3>
-            <p className="text-stone-600 text-sm leading-relaxed mb-8">
-              {card.description}
-            </p>
-            <div className="editorial-stat-card">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#1A1A1A]">
-                {card.stat}
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       {/* Footer CTA */}
       <footer className="mt-20 text-center border-t border-stone-200 pt-12">
-        <p className="text-sm text-stone-600 mb-4">Driven by the spirit of "Jan Bhagidari" and academic rigor.</p>
+        <p className="text-sm text-stone-600 mb-4">{t('spirit')}</p>
         <div className="flex justify-center gap-4">
-          <span className="editorial-tag">NEP 2020 Aligned</span>
-          <span className="editorial-tag">Open Innovation</span>
+          <span className="editorial-tag">{t('nep_aligned')}</span>
+          <span className="editorial-tag">{t('open_innovation')}</span>
         </div>
       </footer>
     </div>
@@ -160,6 +167,7 @@ function HomeView({ setActiveTab, onOpenSubmitModal, analytics, onSelectDistrict
 }
 
 export default function App() {
+  const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<
     'home' | 'challenges' | 'ai-triage' | 'university' | 'industry' | 'lifecycle' | 'analytics' | 'communication' | 'submit-challenge'
   >('home');
@@ -373,12 +381,40 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#BC5434]/20 selection:text-[#1A1A1A]">
+      {/* Language Toggle */}
+      <div className="fixed top-6 left-6 z-50">
+        <div
+          onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
+          className="group relative w-20 h-9 bg-stone-200 rounded-full p-1 cursor-pointer transition-all duration-300 hover:bg-stone-300 shadow-sm border border-stone-300"
+          title={t('language_toggle')}
+        >
+          {/* Sliding Pill */}
+          <div
+            className={`absolute top-1 left-1 w-9 h-7 rounded-full shadow-sm transition-all duration-300 ease-in-out transform ${
+              language === 'en'
+                ? 'translate-x-0 bg-white'
+                : 'translate-x-9 bg-[#BC5434]'
+            }`}
+          />
+
+          {/* Labels */}
+          <div className="relative z-10 flex justify-between items-center h-full px-2 text-[10px] font-bold uppercase tracking-wider">
+            <span className={`transition-colors duration-300 ${language === 'en' ? 'text-stone-900' : 'text-stone-500'}`}>
+              EN
+            </span>
+            <span className={`transition-colors duration-300 ${language === 'hi' ? 'text-white' : 'text-stone-500'}`}>
+              हिंदी
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Global Notification Trigger */}
       <div className="fixed top-6 right-6 z-50">
         <button
           onClick={() => setIsNotificationOpen(true)}
           className="relative p-3 bg-white border border-stone-200 text-stone-500 hover:text-[#BC5434] hover:border-[#BC5434] rounded-full shadow-md transition-all duration-200 cursor-pointer active:scale-90"
-          title="Notifications"
+          title={t('notifications')}
         >
           <Bell className="w-6 h-6" />
           {unreadNotificationsCount > 0 && (
@@ -425,8 +461,8 @@ export default function App() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-28 text-stone-600">
             <Loader2 className="w-8 h-8 animate-spin text-[#BC5434] mb-3" />
-            <p className="text-base font-editorial-serif italic font-bold text-stone-900">Connecting to Jharkhand State Registry...</p>
-            <p className="text-xs uppercase tracking-widest text-stone-500 mt-1">Syncing HEI incubation nodes & field challenges</p>
+            <p className="text-base font-editorial-serif italic font-bold text-stone-900">{t('connecting_registry')}</p>
+            <p className="text-xs uppercase tracking-widest text-stone-500 mt-1">{t('syncing_nodes')}</p>
           </div>
         ) : (
           <div>
@@ -443,6 +479,7 @@ export default function App() {
                   setMapFilter({ type: inst.type, value: inst.id });
                   setActiveTab('challenges');
                 }}
+                t={t}
               />
             )}
 
@@ -454,7 +491,7 @@ export default function App() {
                     className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#BC5434] hover:text-[#A3452B] transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Back to Home</span>
+                    <span>{t('back_to_home')}</span>
                   </button>
                 </div>
 
@@ -579,11 +616,11 @@ export default function App() {
               <div className="flex items-center justify-center md:justify-start gap-2.5 text-stone-100 font-bold text-base">
                 <span className="font-editorial-serif italic text-xl text-white">Samadhan.JH</span>
                 <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#BC5434] border-l border-stone-700 pl-2">
-                  Societal Innovation Portal
+                  {t('footer_title')}
                 </span>
               </div>
               <p className="text-xs text-stone-400 mt-1 font-serif italic max-w-xl">
-                National Education Policy (NEP) 2020: Experiential Learning, Multidisciplinary Field Research & Grassroots Incubation
+                {t('footer_desc')}
               </p>
             </div>
 

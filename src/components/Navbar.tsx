@@ -14,6 +14,7 @@ import {
   Compass,
   Bell,
 } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 import { SubmitterType } from '../types';
 
 interface NavbarProps {
@@ -37,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   unreadNotificationsCount,
 }) => {
+  const { t } = useLanguage();
   const [trackingInput, setTrackingInput] = useState('');
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -53,30 +55,30 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="bg-[#111111] px-4 py-1.5 border-b border-stone-800 text-[11px] flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center px-2 py-0.5 border border-[#BC5434]/50 bg-[#BC5434]/15 text-[#E07A5F] font-bold tracking-wider uppercase text-[10px]">
-            Govt. of Jharkhand
+            {t('navbar_govt')}
           </span>
           <span className="text-stone-400 font-serif italic hidden sm:inline">
-            Department of Higher & Technical Education • State Innovation Council
+            {t('navbar_dept')}
           </span>
         </div>
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 text-stone-300 font-medium text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-[#BC5434]"></span>
-            <span className="uppercase tracking-wider text-[10px] font-semibold text-stone-400">NEP 2020 Experiential Framework</span>
+            <span className="uppercase tracking-wider text-[10px] font-semibold text-stone-400">{t('navbar_nep')}</span>
           </span>
           <div className="h-3 w-px bg-stone-800 hidden sm:block"></div>
           <div className="flex items-center gap-1.5 text-stone-300">
-            <span className="text-stone-400 text-[11px] uppercase tracking-wider font-semibold">Role:</span>
+            <span className="text-stone-400 text-[11px] uppercase tracking-wider font-semibold">{t('navbar_role')}</span>
             <select
               id="role-selector-dropdown"
               value={userRole}
               onChange={(e) => setUserRole(e.target.value as any)}
               className="bg-[#242424] text-stone-200 font-medium text-xs px-2 py-0.5 border border-stone-700 focus:outline-none focus:border-[#BC5434] cursor-pointer"
             >
-              <option value="citizen">Citizen / Gram Panchayat / ULB</option>
-              <option value="university">University / Faculty / Students</option>
-              <option value="industry">Industry / Startup / CSR Partner</option>
-              <option value="admin">Government / State Triage Officer</option>
+              <option value="citizen">{t('navbar_role_citizen')}</option>
+              <option value="university">{t('navbar_role_university')}</option>
+              <option value="industry">{t('navbar_role_industry')}</option>
+              <option value="admin">{t('navbar_role_admin')}</option>
             </select>
           </div>
         </div>
@@ -137,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="inline-flex items-center gap-2 bg-[#BC5434] hover:bg-[#A3452B] text-white text-xs font-bold uppercase tracking-widest px-4 py-2.5 shadow-sm transition-all cursor-pointer whitespace-nowrap active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Submit a Challenge</span>
+              <span>{t('navbar_submit_btn')}</span>
             </button>
           </div>
         </div>
@@ -154,7 +156,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5 text-[#E07A5F]" />
-            <span>Community Challenges</span>
+            <span>{t('navbar_tab_challenges')}</span>
           </button>
 
           <button
@@ -167,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-[#E07A5F]" />
-            <span>AI Triage & HEI Routing</span>
+            <span>{t('navbar_tab_ai')}</span>
           </button>
 
           <button
@@ -180,7 +182,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <GraduationCap className="w-3.5 h-3.5 text-[#E07A5F]" />
-            <span>University Innovation (HEIs)</span>
+            <span>{t('navbar_tab_university')}</span>
           </button>
 
           <button
@@ -193,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Briefcase className="w-3.5 h-3.5 text-[#E07A5F]" />
-            <span>Industry & CSR Hub</span>
+            <span>{t('navbar_tab_industry')}</span>
           </button>
 
           <button
@@ -206,7 +208,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5 text-[#E07A5F]" />
-            <span>Project Lifecycle & IP</span>
+            <span>{t('navbar_tab_lifecycle')}</span>
           </button>
 
           <button
@@ -219,7 +221,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5 text-[#E07A5F]" />
-            <span>Visual Analytics & Heatmap</span>
+            <span>{t('navbar_tab_analytics')}</span>
           </button>
         </nav>
       </div>

@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Flame,
 } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 import { AnalyticsSummary, University, ProblemStatement } from '../types';
 import { THEMATIC_DOMAINS } from '../data/jharkhandData';
 import { JharkhandMap } from './JharkhandMap';
@@ -32,6 +33,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   problems,
   onSelectDistrictFilter,
 }) => {
+  const { t } = useLanguage();
   const [selectedSortBy, setSelectedSortBy] = useState<'challenges' | 'active'>('challenges');
 
   // Sorted districts
@@ -56,20 +58,20 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="editorial-meta">Statewide Innovation Metrics</span>
+              <span className="editorial-meta">{t('ana_metrics_title')}</span>
               <span className="text-stone-600">•</span>
-              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest">Impact Ledger</span>
+              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest">{t('ana_impact_ledger')}</span>
             </div>
             <h2 className="font-editorial-serif italic text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              Jharkhand Innovation Performance Index
+              {t('ana_performance_index')}
             </h2>
             <p className="text-xs text-stone-400 font-serif italic max-w-2xl mt-2 leading-relaxed">
-              Real-time monitoring of community challenge submissions, multidisciplinary university research participation, industry CSR capital deployment, and ground social outcomes across all 24 districts.
+              {t('ana_performance_desc')}
             </p>
           </div>
 
           <div className="bg-stone-900 border border-stone-800 p-4 text-center min-w-[200px]">
-            <span className="editorial-meta !text-[10px] !mb-1 block">Lives Directly Impacted</span>
+            <span className="editorial-meta !text-[10px] !mb-1 block">{t('ana_lives_impacted')}</span>
             <span className="font-editorial-serif text-3xl font-bold text-white tracking-tight">1,84,000+</span>
             <span className="text-[10px] text-stone-400 block font-serif italic mt-1">Across 86 Gram Panchayats</span>
           </div>
@@ -79,37 +81,37 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Primary KPI Cards Grid: Editorial Hairline Top Border */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-stone-900 shadow-none">
-          <div className="editorial-meta !text-[10px] !mb-1">Challenges Logged</div>
+          <div className="editorial-meta !text-[10px] !mb-1">{t('ana_challenges_logged')}</div>
           <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.totalChallengesReceived ?? 0}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">100% Geo-tagged</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-[#BC5434] shadow-none">
-          <div className="editorial-meta !text-[10px] !mb-1">Routed to HEIs</div>
+          <div className="editorial-meta !text-[10px] !mb-1">{t('ana_routed_heis')}</div>
           <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.totalAssignedToHEIs ?? 0}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">{analytics?.facultyMentorsEngaged ?? 0} Faculty Mentors</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-stone-900 shadow-none">
-          <div className="editorial-meta !text-[10px] !mb-1">Active Prototypes</div>
+          <div className="editorial-meta !text-[10px] !mb-1">{t('ana_active_prototypes')}</div>
           <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.activePrototypes ?? 0}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">In Univ Incubation Labs</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-[#BC5434] shadow-none">
-          <div className="editorial-meta !text-[10px] !mb-1">Field Pilots</div>
+          <div className="editorial-meta !text-[10px] !mb-1">{t('ana_field_pilots')}</div>
           <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.fieldPilotsDeployed ?? 0}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">Deployed in Districts</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-stone-900 shadow-none">
-          <div className="editorial-meta !text-[10px] !mb-1">CSR Pledged</div>
+          <div className="editorial-meta !text-[10px] !mb-1">{t('ana_csr_pledged')}</div>
           <div className="font-editorial-serif text-3xl font-light text-stone-900">₹{(analytics?.totalFundingPledgedLakhs ?? 0).toFixed(0)}L</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">Corporate & MSME Grants</div>
         </div>
 
         <div className="bg-white p-4 border border-stone-300 border-t-2 border-t-[#BC5434] shadow-none">
-          <div className="editorial-meta !text-[10px] !mb-1">Students in NEP</div>
+          <div className="editorial-meta !text-[10px] !mb-1">{t('ana_students_nep')}</div>
           <div className="font-editorial-serif text-3xl font-light text-stone-900">{analytics?.studentsParticipating ?? 0}</div>
           <div className="text-[10px] text-stone-500 font-serif italic mt-1">Experiential Credits</div>
         </div>
@@ -119,13 +121,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="bg-white border border-stone-300 p-6 shadow-none">
         <h3 className="editorial-meta !text-xs !mb-4 flex items-center gap-2">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Measurable Ground Social Outcomes Across Jharkhand</span>
+          <span>{t('ana_outcomes_title')}</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 bg-[#FAF7F2] border border-stone-300 text-xs">
             <div className="flex items-center gap-2 mb-1.5 text-stone-900 font-bold uppercase tracking-wider text-[11px]">
               <Droplets className="w-3.5 h-3.5 text-[#BC5434]" />
-              <span>Safe Drinking Water</span>
+              <span>{t('ana_water_title')}</span>
             </div>
             <div className="font-editorial-serif text-xl font-bold text-stone-900">1,25,000 Liters/Day</div>
             <p className="text-[11px] text-stone-600 font-serif italic mt-1.5 leading-relaxed">
@@ -136,7 +138,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="p-4 bg-[#FAF7F2] border border-stone-300 text-xs">
             <div className="flex items-center gap-2 mb-1.5 text-stone-900 font-bold uppercase tracking-wider text-[11px]">
               <Sprout className="w-3.5 h-3.5 text-[#BC5434]" />
-              <span>Tribal Agricultural Yield</span>
+              <span>{t('ana_agri_title')}</span>
             </div>
             <div className="font-editorial-serif text-xl font-bold text-stone-900">+28% Millets & Lac</div>
             <p className="text-[11px] text-stone-600 font-serif italic mt-1.5 leading-relaxed">
@@ -147,7 +149,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="p-4 bg-[#FAF7F2] border border-stone-300 text-xs">
             <div className="flex items-center gap-2 mb-1.5 text-stone-900 font-bold uppercase tracking-wider text-[11px]">
               <Flame className="w-3.5 h-3.5 text-[#BC5434]" />
-              <span>Mine Fire Mitigation</span>
+              <span>{t('ana_mine_title')}</span>
             </div>
             <div className="font-editorial-serif text-xl font-bold text-stone-900">3 Fissures Sealed</div>
             <p className="text-[11px] text-stone-600 font-serif italic mt-1.5 leading-relaxed">
@@ -158,7 +160,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="p-4 bg-[#FAF7F2] border border-stone-300 text-xs">
             <div className="flex items-center gap-2 mb-1.5 text-stone-900 font-bold uppercase tracking-wider text-[11px]">
               <Award className="w-3.5 h-3.5 text-[#BC5434]" />
-              <span>Grassroots IP & Startups</span>
+              <span>{t('ana_ip_title')}</span>
             </div>
             <div className="font-editorial-serif text-xl font-bold text-stone-900">19 Patents • 11 Startups</div>
             <p className="text-[11px] text-stone-600 font-serif italic mt-1.5 leading-relaxed">
@@ -175,7 +177,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div>
             <div className="flex items-center justify-between mb-5 border-b border-stone-200 pb-3">
               <h3 className="font-editorial-serif italic text-lg font-bold text-stone-900">
-                Thematic Domain Breakdown
+                {t('ana_domain_breakdown')}
               </h3>
             </div>
 
@@ -198,7 +200,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                       </div>
                     </div>
 
-
                     <div className="w-full bg-stone-100 h-2 overflow-hidden border border-stone-200">
                       <div
                         className="bg-stone-900 h-full transition-all duration-300"
@@ -218,9 +219,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <div className="flex items-center justify-between mb-5 border-b border-stone-200 pb-3">
               <div>
                 <h3 className="font-editorial-serif italic text-lg font-bold text-stone-900">
-                  District Ledger & Spatial Heatmap
+                  {t('ana_geo_distribution')}
                 </h3>
-                <span className="text-[11px] text-stone-500 font-serif italic">Across all 24 administrative districts</span>
+                <span className="text-[11px] text-stone-500 font-serif italic">{t('ana_geo_desc')}</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-[11px]">
@@ -231,7 +232,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     selectedSortBy === 'challenges' ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300'
                   }`}
                 >
-                  Challenges
+                  {t('ana_sort_challenges')}
                 </button>
                 <button
                   onClick={() => setSelectedSortBy('active')}
@@ -239,7 +240,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     selectedSortBy === 'active' ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300'
                   }`}
                 >
-                  Projects
+                  {t('ana_sort_projects')}
                 </button>
               </div>
             </div>
@@ -268,7 +269,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                         </div>
                       </div>
 
-
                       <div className="w-full bg-stone-200 h-1.5 overflow-hidden">
                         <div
                           className="bg-[#BC5434] h-full transition-all duration-300"
@@ -288,9 +288,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="bg-white border border-stone-300 p-6 shadow-none">
         <h3 className="flex items-center justify-between mb-4 border-b border-stone-200 pb-3">
           <span className="font-editorial-serif italic text-lg font-bold text-stone-900">
-            Higher Education Institutions (HEIs) Experiential Research Leaderboard
+            {t('ana_hei_leaderboard')}
           </span>
-          <span className="editorial-meta !text-[10px] !mb-0">Ranked by Grassroots Adoptions</span>
+          <span className="editorial-meta !text-[10px] !mb-0">{t('ana_hei_rank')}</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

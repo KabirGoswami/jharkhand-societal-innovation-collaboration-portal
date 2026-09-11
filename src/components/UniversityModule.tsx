@@ -18,6 +18,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { ProblemStatement, University, SolutionProposal, ProjectMilestone } from '../types';
+import { useLanguage } from '../LanguageContext';
 
 interface UniversityModuleProps {
   universities: University[];
@@ -36,6 +37,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
   onSubmitProposal,
   onUpdateMilestone,
 }) => {
+  const { t } = useLanguage();
   const [selectedHeiId, setSelectedHeiId] = useState<string>(universities[0]?.id || 'hei-bit-mesra');
   const [activeSubTab, setActiveSubTab] = useState<'assigned' | 'proposals' | 'team-builder'>('assigned');
   const [targetProblemForProposal, setTargetProblemForProposal] = useState<ProblemStatement | null>(null);
@@ -71,7 +73,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
   if (!currentHei) {
     return (
       <div className="flex items-center justify-center py-20 text-stone-500 font-serif italic">
-        Loading institutional data...
+        {t('univ_loading')}
       </div>
     );
   }
@@ -206,7 +208,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="editorial-meta">NEP 2020 HEI Portal</span>
+              <span className="editorial-meta">{t('univ_portal_title')}</span>
               <span className="text-stone-600">•</span>
               <span className="text-[10px] font-mono text-stone-500 uppercase tracking-widest">
                 {currentHei.type} • Est. {currentHei.establishedYear}
@@ -220,7 +222,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-600">Switch Institution:</label>
+          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-600">{t('univ_switch_inst')}</label>
           <select
             id="select-active-hei"
             value={selectedHeiId}
@@ -249,7 +251,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               : 'hover:text-stone-900 border-b-2 border-transparent'
           }`}
         >
-          <span>Assigned Challenges</span>
+          <span>{t('univ_tab_assigned')}</span>
           <span className="px-1.5 py-0.5 bg-[#FAF7F2] text-stone-900 text-[10px] border border-stone-300">
             {assignedProblems.length}
           </span>
@@ -263,7 +265,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               : 'hover:text-stone-900 border-b-2 border-transparent'
           }`}
         >
-          <span>Submitted Proposals</span>
+          <span>{t('univ_tab_proposals')}</span>
           <span className="px-1.5 py-0.5 bg-[#FAF7F2] text-stone-900 text-[10px] border border-stone-300">
             {heiProposals.length}
           </span>
@@ -279,21 +281,21 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Draft Proposal ({targetProblemForProposal.trackingCode})</span>
+            <span>{t('univ_tab_draft', targetProblemForProposal.trackingCode)}</span>
           </button>
         )}
       </div>
 
-      {/* Sub-Tab 1: Assigned Challenges */}
+      {/* Sub-Tab 1: {t('univ_tab_assigned')} */}
       {activeSubTab === 'assigned' && (
         <div className="space-y-4">
           <div className="bg-[#FAF7F2] border border-[#BC5434] p-4 text-xs text-stone-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <strong className="text-[#BC5434] uppercase tracking-wider font-bold text-[10px] mr-2">NEP 2020 Action Mandate:</strong> 
-              <span className="font-serif italic">Constitute multidisciplinary faculty-student teams, assign research credits, and submit innovative technical proposals for on-ground testing.</span>
+              <strong className="text-[#BC5434] uppercase tracking-wider font-bold text-[10px] mr-2">{t('univ_action_mandate')}</strong>
+              <span className="font-serif italic">{t('univ_action_desc')}</span>
             </div>
             <div className="font-bold uppercase tracking-widest text-[10px] whitespace-nowrap">
-              {assignedProblems.length} Pending Actions
+              {t('univ_pending_actions', assignedProblems.length)}
             </div>
           </div>
 
@@ -348,14 +350,14 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
                     className="w-full inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest px-4 py-3 cursor-pointer transition-colors"
                   >
                     <Users className="w-4 h-4" />
-                    <span>Constitute Team</span>
+                    <span>{t('univ_constitute_team')}</span>
                   </button>
 
                   <button
                     onClick={() => onSelectProblem(prob)}
                     className="w-full text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-900 py-2 border border-transparent hover:border-stone-300 cursor-pointer"
                   >
-                    View Community Evidence
+                    {t('univ_view_evidence')}
                   </button>
                 </div>
               </div>
@@ -363,7 +365,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
 
             {assignedProblems.length === 0 && (
               <div className="bg-white border border-stone-300 p-8 text-center text-stone-500 font-serif italic text-sm">
-                No challenges currently routed to {currentHei.name}. Check the AI Triage tab to allocate incoming societal challenges.
+                {t('univ_no_assigned', currentHei.name)}
               </div>
             )}
           </div>
@@ -382,7 +384,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-stone-900 bg-[#FAF7F2] px-2 py-0.5 border border-stone-300 inline-block mb-2">
-                      NEP Experiential Credits: {prop.nepExperientialCredits}
+                      {t('univ_nep_credits')} {prop.nepExperientialCredits}
                     </span>
                     <h3 className="font-editorial-serif italic text-2xl font-bold text-stone-900">{prop.projectTitle}</h3>
                     <div className="text-xs text-stone-600 font-serif italic mt-1">
@@ -407,19 +409,19 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
                 {/* Team & Faculty Details */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs p-4 border border-stone-200">
                   <div>
-                    <div className="editorial-meta text-stone-500 mb-1">Faculty Mentor</div>
+                    <div className="editorial-meta text-stone-500 mb-1">{t('univ_faculty_mentor')}</div>
                     <div className="font-bold text-stone-900">{prop.facultyMentor.name}</div>
                     <div className="text-stone-600 font-serif italic mt-0.5">{prop.facultyMentor.department}</div>
                   </div>
                   <div>
-                    <div className="editorial-meta text-stone-500 mb-1">Student Team</div>
+                    <div className="editorial-meta text-stone-500 mb-1">{t('univ_student_team')}</div>
                     <div className="font-bold text-stone-900">{prop.studentTeam.leadName} (Lead)</div>
                     <div className="text-stone-600 font-serif italic mt-0.5">
                       {prop.studentTeam.membersCount} Researchers ({prop.studentTeam.departments.join(', ')})
                     </div>
                   </div>
                   <div>
-                    <div className="editorial-meta text-stone-500 mb-1">Industry Sponsor</div>
+                    <div className="editorial-meta text-stone-500 mb-1">{t('univ_industry_sponsor')}</div>
                     <div className="font-bold text-[#BC5434]">
                       {prop.industryPartnerName || 'Seeking CSR Sponsor'}
                     </div>
@@ -430,9 +432,9 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
                 {/* Milestones Roadmaps */}
                 <div className="pt-2">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-stone-900 mb-3 flex items-center justify-between border-b border-stone-200 pb-2">
-                    <span>Execution Milestones ({prop.milestones.length})</span>
+                    <span>{t('univ_execution_milestones', prop.milestones.length)}</span>
                     <span className="text-stone-500">
-                      {prop.milestones.filter((m) => m.status === 'completed').length}/{prop.milestones.length} Completed
+                      {prop.milestones.filter((m) => m.status === 'completed').length}/{prop.milestones.length} {t('univ_milestone_completed')}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -458,7 +460,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
                               m.status === 'completed' ? 'text-stone-900' : m.status === 'in_progress' ? 'text-[#BC5434]' : 'text-stone-400'
                             }`}
                           >
-                            {m.status === 'completed' ? '✓ Done' : m.status === 'in_progress' ? '● Active' : '○ Wait'}
+                            {m.status === 'completed' ? t('univ_milestone_done') : m.status === 'in_progress' ? t('univ_milestone_active') : t('univ_milestone_wait')}
                           </span>
                         </div>
                         <div className="font-editorial-serif font-bold text-sm leading-tight mb-1">{m.title}</div>
@@ -486,7 +488,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
             <div>
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FAF7F2] text-[#BC5434] border border-stone-300 mb-2">
                 <Sparkles className="w-3 h-3" />
-                <span>Multidisciplinary Team & NEP 2020 Formulator</span>
+                <span>{t('univ_team_formulator')}</span>
               </div>
               <h3 className="font-editorial-serif text-2xl font-bold text-stone-900 leading-snug">{targetProblemForProposal.title}</h3>
               <p className="text-xs text-stone-600 font-serif italic mt-1">
@@ -502,7 +504,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               className="inline-flex items-center justify-center gap-2 bg-[#FAF7F2] hover:bg-white text-[#BC5434] border border-[#BC5434] text-[11px] font-bold uppercase tracking-widest px-6 py-3 transition-all cursor-pointer disabled:opacity-50"
             >
               {isGeneratingAiProposal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              <span>{isGeneratingAiProposal ? 'Generating...' : 'Generate AI Draft'}</span>
+              <span>{isGeneratingAiProposal ? t('univ_ai_generating') : t('univ_ai_draft_btn')}</span>
             </button>
           </div>
 
@@ -510,7 +512,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
           <div className="space-y-5">
             <div>
               <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
-                Project Innovation Title <span className="text-[#BC5434]">*</span>
+                {t('univ_proposal_title')} <span className="text-[#BC5434]">*</span>
               </label>
               <input
                 id="input-proposal-title"
@@ -524,7 +526,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
 
             <div>
               <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
-                Executive Abstract & Societal Value <span className="text-[#BC5434]">*</span>
+                {t('univ_proposal_abstract')} <span className="text-[#BC5434]">*</span>
               </label>
               <textarea
                 id="textarea-proposal-abstract"
@@ -538,7 +540,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
 
             <div>
               <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
-                Technology Methodology & Implementation Steps
+                {t('univ_proposal_method')}
               </label>
               <textarea
                 rows={4}
@@ -554,14 +556,14 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               <div className="text-[10px] uppercase font-bold tracking-wider text-stone-900 flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-200 pb-2">
                 <span className="flex items-center gap-2">
                   <Users className="w-3.5 h-3.5" />
-                  <span>Innovation Team</span>
+                  <span>{t('univ_innovation_team')}</span>
                 </span>
                 <span className="text-stone-500 font-serif italic lowercase tracking-normal mt-1 sm:mt-0">NEP 2020 Capstone / Experiential Learning</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">Lead Faculty Mentor</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">{t('univ_faculty_mentor')}</label>
                   <input
                     type="text"
                     value={leadFacultyName}
@@ -571,7 +573,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">Student Lead Name</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">{t('univ_student_team')}</label>
                   <input
                     type="text"
                     value={studentLeadName}
@@ -600,7 +602,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               <div className="text-[10px] uppercase font-bold tracking-wider text-stone-900 flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-200 pb-2">
                 <span className="flex items-center gap-2">
                   <IndianRupee className="w-3.5 h-3.5" />
-                  <span>Budget Breakdown (INR)</span>
+                  <span>{t('univ_budget_breakdown')}</span>
                 </span>
                 <span className="text-[#BC5434] font-bold mt-1 sm:mt-0">
                   Total: ₹{((hardwareBudget + prototypingBudget + fieldTestingBudget + travelBudget + contingencyBudget) / 100000).toFixed(2)} Lakhs
@@ -659,7 +661,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
             {/* IP Potential */}
             <div>
               <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
-                Intellectual Property & Commercialization Potential
+                {t('univ_ip_potential')}
               </label>
               <select
                 value={ipPotential}
@@ -680,7 +682,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               onClick={() => setActiveSubTab('assigned')}
               className="px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-900 cursor-pointer text-center"
             >
-              Cancel
+              {t('univ_cancel')}
             </button>
             <button
               type="button"
@@ -690,7 +692,7 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
               className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] px-8 py-3 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isSubmittingProposal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              <span>Submit Proposal & Open for Industry CSR</span>
+              <span>{t('univ_submit_proposal')}</span>
             </button>
           </div>
         </div>

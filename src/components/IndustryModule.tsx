@@ -14,6 +14,7 @@ import {
   Target,
   FileCheck,
 } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 import { IndustryPartner, SolutionProposal, ProblemStatement } from '../types';
 
 interface IndustryModuleProps {
@@ -31,6 +32,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
   onPledgeFunding,
   onSelectProblem,
 }) => {
+  const { t } = useLanguage();
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>(industryPartners[0]?.id || 'ind-tata-steel');
   const [activeTab, setActiveTab] = useState<'proposals' | 'partners' | 'csr-tracker'>('proposals');
 
@@ -46,7 +48,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
   if (!currentPartner) {
     return (
       <div className="flex items-center justify-center py-20 text-stone-500 font-serif italic">
-        Loading industry partner data...
+        {t('ind_loading')}
       </div>
     );
   }
@@ -88,22 +90,22 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="editorial-meta">Corporate Social Responsibility (CSR)</span>
+              <span className="editorial-meta">{t('ind_csr_title')}</span>
               <span className="text-stone-600">•</span>
-              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest">Innovation Exchange</span>
+              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest">{t('ind_innovation_exchange')}</span>
             </div>
             <h2 className="font-editorial-serif italic text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              Jharkhand Industry Co-Development Portal
+              {t('ind_industry_portal')}
             </h2>
             <p className="text-xs text-stone-400 font-serif italic max-w-2xl mt-2 leading-relaxed">
-              Connect corporate CSR funds, start-up R&D, and public sector mining enterprises (BCCL, Tata Steel, CMPDI, SAIL) directly with vetted Higher Education student-faculty research projects.
+              {t('ind_industry_desc')}
             </p>
           </div>
 
           <div className="bg-[#FAF7F2] border border-[#BC5434] p-4 text-center md:text-right min-w-[200px]">
-            <div className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Total Pledged</div>
+            <div className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">{t('ind_total_pledged')}</div>
             <div className="font-editorial-serif text-3xl font-light text-[#BC5434] mt-1">₹{totalPledgedLakhs.toFixed(1)} L</div>
-            <div className="text-[10px] text-stone-500 font-serif italic mt-1">Across {industryPartners.length} Active Enablers</div>
+            <div className="text-[10px] text-stone-500 font-serif italic mt-1">{t('ind_active_enablers', industryPartners.length.toString())}</div>
           </div>
         </div>
       </div>
@@ -111,7 +113,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
       {/* Corporate Identity Selector */}
       <div className="bg-[#FAF7F2] p-4 border border-stone-300 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600">Simulating as Partner:</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600">{t('ind_simulating_partner')}</span>
           <select
             id="select-industry-partner"
             value={selectedPartnerId}
@@ -147,7 +149,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
               : 'hover:text-stone-900 border-b-2 border-transparent'
           }`}
         >
-          <span>University Research Proposals</span>
+          <span>{t('ind_tab_proposals')}</span>
           <span className="px-1.5 py-0.5 bg-[#FAF7F2] text-stone-900 text-[10px] border border-stone-300">
             {proposals.length}
           </span>
@@ -161,7 +163,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
               : 'hover:text-stone-900 border-b-2 border-transparent'
           }`}
         >
-          <span>Corporate Directory</span>
+          <span>{t('ind_tab_directory')}</span>
           <span className="px-1.5 py-0.5 bg-[#FAF7F2] text-stone-900 text-[10px] border border-stone-300">
             {industryPartners.length}
           </span>
@@ -175,7 +177,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
               : 'hover:text-stone-900 border-b-2 border-transparent'
           }`}
         >
-          <span>CSR Impact Tracker</span>
+          <span>{t('ind_tab_tracker')}</span>
         </button>
       </div>
 
@@ -206,11 +208,11 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
                     {hasSponsor ? (
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-stone-100 text-stone-800 border border-stone-300 flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-[#BC5434]" />
-                        <span>Sponsored by {prop.industryPartnerName}</span>
+                        <span>{t('ind_sponsored_by', prop.industryPartnerName)}</span>
                       </span>
                     ) : (
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FAF7F2] text-[#BC5434] border border-stone-300">
-                        Open for CSR Sponsorship
+                        {t('ind_open_csr')}
                       </span>
                     )}
                   </div>
@@ -252,7 +254,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
                       className="w-full inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest px-4 py-3.5 transition-colors cursor-pointer shadow-sm"
                     >
                       <IndianRupee className="w-3.5 h-3.5" />
-                      <span>Pledge Grant</span>
+                      <span>{t('ind_pledge_grant')}</span>
                     </button>
                   ) : (
                     <div className="p-4 bg-[#FAF7F2] border border-[#BC5434] text-stone-900 text-center">
@@ -266,7 +268,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
                       onClick={() => onSelectProblem(linkedProblem)}
                       className="w-full text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-900 py-2 border border-transparent hover:border-stone-300 cursor-pointer"
                     >
-                      View Ground Problem
+                      {t('ind_view_problem')}
                     </button>
                   )}
                 </div>
@@ -356,7 +358,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
 
           <div className="bg-white border border-stone-300 p-6">
             <h3 className="font-editorial-serif text-xl font-bold text-stone-900 mb-6 flex items-center gap-2 pb-4 border-b border-stone-200">
-              <ShieldCheck className="w-5 h-5 text-stone-400" /> Corporate Sponsorship Registry
+              <ShieldCheck className="w-5 h-5 text-stone-400" /> {t('ind_corporate_registry')}
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
@@ -402,7 +404,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
             <div className="flex items-center justify-between pb-4 border-b border-stone-200 mb-6">
               <div className="flex items-center gap-3">
                 <Briefcase className="w-5 h-5 text-stone-400" />
-                <h3 className="font-editorial-serif text-xl font-bold text-stone-900">Pledge CSR & Mentorship</h3>
+                <h3 className="font-editorial-serif text-xl font-bold text-stone-900">{t('ind_pledge_modal_title')}</h3>
               </div>
               <button
                 onClick={() => setPledgingProposal(null)}
@@ -413,7 +415,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
             </div>
 
             <div className="mb-6">
-              <div className="text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1.5">Sponsoring Research Project</div>
+              <div className="text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1.5">{t('ind_pledge_modal_title')}</div>
               <div className="font-editorial-serif text-2xl font-bold text-stone-900 leading-snug">{pledgingProposal.projectTitle}</div>
               <div className="text-xs text-stone-600 font-serif italic mt-2">
                 HEI: {pledgingProposal.heiName} <span className="mx-1">•</span> Lead: {pledgingProposal.facultyMentor.name}
@@ -435,7 +437,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
 
               <div>
                 <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5 flex justify-between">
-                  <span>CSR Prototyping Grant (in ₹ Lakhs)</span>
+                  <span>{t('ind_pledge_grant_label')}</span>
                   <span className="text-[#BC5434] font-bold">₹{pledgeAmountLakhs} L</span>
                 </label>
                 <input
@@ -456,7 +458,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
 
               <div>
                 <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
-                  Designated Industry Technical Mentor
+                  {t('ind_mentor_label')}
                 </label>
                 <input
                   type="text"
@@ -469,7 +471,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
 
               <div>
                 <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-700 mb-1.5">
-                  Offered Field Pilot Testbed Site in Jharkhand
+                  {t('ind_site_label')}
                 </label>
                 <input
                   type="text"
@@ -481,7 +483,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
               </div>
 
               <div className="p-4 bg-[#FAF7F2] border border-stone-200 text-stone-600 text-xs font-serif italic leading-relaxed">
-                <strong className="not-italic text-stone-900">CSR Compliance Note:</strong> Grants allocated through the Jharkhand Samadhan portal meet Ministry of Corporate Affairs Section 135 Schedule VII item (ix) for incubation & academic experiential innovation.
+                <strong className="not-italic text-stone-900">{t('ind_compliance_note').split(':')[0]}:</strong> {t('ind_compliance_note').split(':')[1]}
               </div>
             </div>
 
@@ -491,7 +493,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
                 onClick={() => setPledgingProposal(null)}
                 className="px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-900 cursor-pointer text-center"
               >
-                Cancel
+                {t('ind_cancel')}
               </button>
               <button
                 type="button"
@@ -501,7 +503,7 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
                 className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] px-8 py-3 transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingPledge ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                <span>Confirm Grant & Sign MoU</span>
+                <span>{t('ind_confirm_pledge')}</span>
               </button>
             </div>
           </div>

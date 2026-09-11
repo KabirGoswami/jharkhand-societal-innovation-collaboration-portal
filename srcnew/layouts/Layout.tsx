@@ -3,6 +3,8 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { CitizenSubmissionModal } from '../components/CitizenSubmissionModal';
 import { ProblemDetailsModal } from '../components/ProblemDetailsModal';
+import { useLanguage } from '../../src/LanguageContext';
+import { Languages } from 'lucide-react';
 import {
   ProblemStatement,
   AnalyticsSummary,
@@ -20,6 +22,7 @@ import {
 import { Loader2 } from 'lucide-react';
 
 export default function Layout() {
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -200,6 +203,34 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#BC5434]/20 selection:text-[#1A1A1A]">
+      {/* Language Toggle */}
+      <div className="fixed top-6 left-6 z-50">
+        <div
+          onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
+          className="group relative w-20 h-9 bg-stone-200 rounded-full p-1 cursor-pointer transition-all duration-300 hover:bg-stone-300 shadow-sm border border-stone-300"
+          title={t('language_toggle')}
+        >
+          {/* Sliding Pill */}
+          <div
+            className={`absolute top-1 left-1 w-9 h-7 rounded-full shadow-sm transition-all duration-300 ease-in-out transform ${
+              language === 'en'
+                ? 'translate-x-0 bg-white'
+                : 'translate-x-9 bg-[#BC5434]'
+            }`}
+          />
+
+          {/* Labels */}
+          <div className="relative z-10 flex justify-between items-center h-full px-2 text-[10px] font-bold uppercase tracking-wider">
+            <span className={`transition-colors duration-300 ${language === 'en' ? 'text-stone-900' : 'text-stone-500'}`}>
+              EN
+            </span>
+            <span className={`transition-colors duration-300 ${language === 'hi' ? 'text-white' : 'text-stone-500'}`}>
+              हिंदी
+            </span>
+          </div>
+        </div>
+      </div>
+
       <Navbar
         userRole={userRole}
         setUserRole={setUserRole}

@@ -15,6 +15,7 @@ import {
   ExternalLink,
   ShieldCheck,
 } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 import { ProblemStatement, SolutionProposal } from '../types';
 import { DiscussionThread } from './DiscussionThread';
 
@@ -33,6 +34,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
   onUpvote,
   currentUserRole,
 }) => {
+  const { t } = useLanguage();
   if (!problem) return null;
 
   const [activeTab, setActiveTab] = useState<'overview' | 'ai-dossier' | 'proposal' | 'discussions'>('overview');
@@ -73,7 +75,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
               className="inline-flex items-center gap-1.5 bg-[#BC5434] hover:bg-[#5C2A0B] text-xs font-bold uppercase tracking-widest text-white px-3.5 py-1.5 transition-colors cursor-pointer"
             >
               <ThumbsUp className="w-3.5 h-3.5" />
-              <span>{problem.upvotesCount} Endorse</span>
+              <span>{t('prob_detail_endorse', problem.upvotesCount.toString())}</span>
             </button>
             <button
               onClick={onClose}
@@ -107,7 +109,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             }`}
           >
             <FileText className="w-3.5 h-3.5 text-[#BC5434]" />
-            <span>Ground Overview</span>
+            <span>{t('prob_detail_tab_overview')}</span>
           </button>
 
           <button
@@ -119,7 +121,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-[#BC5434]" />
-            <span>AI Triage & HEI Match</span>
+            <span>{t('prob_detail_tab_ai')}</span>
           </button>
 
           <button
@@ -131,7 +133,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             }`}
           >
             <Building2 className="w-3.5 h-3.5 text-[#BC5434]" />
-            <span>University Proposal & Team</span>
+            <span>{t('prob_detail_tab_proposal')}</span>
           </button>
 
           <button
@@ -143,7 +145,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 text-[#BC5434]" />
-            <span>Live Discussions</span>
+            <span>{t('prob_detail_tab_discussions')}</span>
           </button>
         </div>
 
@@ -154,7 +156,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             <div className="space-y-4 text-xs">
               <div>
                 <h4 className="editorial-meta !text-[10px] !mb-1.5">
-                  Societal Problem Narrative
+                  {t('prob_detail_narrative')}
                 </h4>
                 <p className="text-stone-800 text-sm leading-relaxed whitespace-pre-wrap bg-white p-4 border border-stone-300 font-serif">
                   {problem.description}
@@ -165,7 +167,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
               {problem.mediaUrls && problem.mediaUrls.length > 0 && (
                 <div>
                   <h4 className="editorial-meta !text-[10px] !mb-2">
-                    Visual Field Evidence
+                    {t('prob_detail_visual_evidence')}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {problem.mediaUrls.map((url, i) => (
@@ -187,7 +189,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                 <div>
                   <div className="editorial-meta !text-[10px] !mb-1 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#BC5434]" />
-                    <span>Geo-Location Coordinates</span>
+                    <span>{t('prob_detail_geo_coords')}</span>
                   </div>
                   <div className="text-stone-900 font-mono font-bold">
                     Lat: {problem.locationCoords?.lat ?? 'N/A'}, Lng: {problem.locationCoords?.lng ?? 'N/A'}
@@ -196,7 +198,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                 </div>
 
                 <div>
-                  <div className="editorial-meta !text-[10px] !mb-1">Impact & Urgency</div>
+                  <div className="editorial-meta !text-[10px] !mb-1">{t('prob_detail_impact_urgency')}</div>
                   <div className="text-stone-900 font-editorial-serif text-lg font-bold">
                     {(problem.affectedPopulation || 0).toLocaleString()} Directly Affected Citizens
                   </div>
@@ -215,7 +217,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                     <div className="flex items-center justify-between mb-2 border-b border-stone-200 pb-2">
                       <span className="font-editorial-serif text-base font-bold text-stone-900 flex items-center gap-1.5">
                         <Sparkles className="w-4 h-4 text-[#BC5434]" />
-                        <span>AI Classification & Priority</span>
+                        <span>{t('prob_detail_ai_classification')}</span>
                       </span>
                       <span className="bg-stone-900 text-white font-mono font-bold px-2.5 py-1 text-xs">
                         Score: {problem.aiAnalysis.priorityScore}/100
@@ -232,7 +234,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                     <div className="bg-white border border-stone-300 p-4">
                       <div className="font-bold text-stone-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5 mb-2 text-[#BC5434]">
                         <AlertTriangle className="w-4 h-4" />
-                        <span>Similar Identified Issues in Jharkhand</span>
+                        <span>{t('prob_detail_sim_issues')}</span>
                       </div>
                       <div className="space-y-1.5">
                         {problem.aiAnalysis.duplicateMatches.map((dm, idx) => (
@@ -248,7 +250,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                   {/* Matched HEIs */}
                   <div>
                     <h4 className="editorial-meta !text-[10px] !mb-2">
-                      Recommended Research Institutions (HEIs)
+                      {t('prob_detail_rec_heis')}
                     </h4>
                     <div className="space-y-2">
                       {problem.aiAnalysis.matchedHeis?.map((m, idx) => (
@@ -280,7 +282,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                 </div>
               ) : (
                 <div className="text-center py-8 text-stone-500 font-serif italic">
-                  No automated AI analysis cached yet for this problem statement.
+                  {t('prob_detail_no_ai')}
                 </div>
               )}
             </div>
@@ -303,14 +305,14 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="p-3.5 bg-white border border-stone-300">
-                      <div className="editorial-meta !text-[10px] !mb-1">Assigned Faculty Mentor</div>
+                      <div className="editorial-meta !text-[10px] !mb-1">{t('prob_detail_assigned_faculty')}</div>
                       <div className="font-bold text-stone-900">{proposal.facultyMentor?.name || 'Unknown Mentor'}</div>
                       <div className="text-stone-600 text-[11px]">{proposal.facultyMentor?.department || 'Unknown Department'}</div>
                       <div className="text-stone-500 font-mono text-[10px]">{proposal.facultyMentor?.email || 'No email provided'}</div>
                     </div>
 
                     <div className="p-3.5 bg-white border border-stone-300">
-                      <div className="editorial-meta !text-[10px] !mb-1">Student Research Team</div>
+                      <div className="editorial-meta !text-[10px] !mb-1">{t('prob_detail_student_team')}</div>
                       <div className="font-bold text-stone-900">{proposal.studentTeam?.leadName || 'Unknown Lead'} (Lead)</div>
                       <div className="text-stone-600 text-[11px]">{proposal.studentTeam?.membersCount || 0} Multidisciplinary Members</div>
                       <div className="text-stone-500 text-[10px]">{proposal.studentTeam?.departments?.join(', ') || 'No departments listed'}</div>
@@ -320,13 +322,13 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                   {/* Budget */}
                   <div className="p-4 bg-[#FAF7F2] border border-stone-300 flex justify-between items-center">
                     <div>
-                      <div className="editorial-meta !text-[10px] !mb-1">Total Prototype Budget</div>
+                      <div className="editorial-meta !text-[10px] !mb-1">{t('prob_detail_budget')}</div>
                       <div className="font-editorial-serif text-2xl font-light text-stone-900">
                         ₹{((proposal.budgetBreakdown?.totalAmount || 0) / 100000).toFixed(2)} Lakhs
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="editorial-meta !text-[10px] !mb-1">Industry Sponsor</div>
+                      <div className="editorial-meta !text-[10px] !mb-1">{t('prob_detail_sponsor')}</div>
                       <div className="font-bold text-stone-900">{proposal.industryPartnerName || 'Seeking CSR'}</div>
                     </div>
                   </div>
@@ -334,7 +336,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                   {/* Milestones list */}
                   <div>
                     <h4 className="editorial-meta !text-[10px] !mb-2">
-                      Milestones Roadmap
+                      {t('prob_detail_milestones')}
                     </h4>
                     <div className="space-y-2">
                       {proposal.milestones?.map((m) => (
@@ -355,10 +357,10 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
                 <div className="text-center py-8 text-stone-500 font-serif italic">
                   {problem.assignedHeiName ? (
                     <div>
-                      Problem is routed to <strong>{problem.assignedHeiName}</strong>. Solution proposal is currently being formulated by the student-faculty team.
+                      {t('prob_detail_routed_msg', problem.assignedHeiName)}
                     </div>
                   ) : (
-                    <div>Not yet routed to a Higher Education Institution. Open the AI Triage tab to allocate.</div>
+                    <div>{t('prob_detail_not_routed')}</div>
                   )}
                 </div>
               )}
@@ -384,7 +386,7 @@ export const ProblemDetailsModal: React.FC<ProblemDetailsModalProps> = ({
             onClick={onClose}
             className="bg-[#1A1A1A] hover:bg-stone-800 text-white font-bold uppercase tracking-widest text-xs px-5 py-2.5 transition-colors cursor-pointer"
           >
-            Close Dossier
+            {t('prob_detail_close')}
           </button>
         </div>
       </div>

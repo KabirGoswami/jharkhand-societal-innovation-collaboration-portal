@@ -121,13 +121,17 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
       });
 
     // Create a projection fitting the bounding box of both the map and the markers
-    const projection = d3.geoMercator().fitSize([width - 40, height - 40], combinedGeoData);
+    const projection = d3.geoMercator().fitSize([width - 40, height - 40], combinedGeoData as any);
     const pathGenerator = d3.geoPath().projection(projection);
 
-    const maxChallenges = (d3.max(districtStats, (d: { challengesCount: number }) => d.challengesCount) || 1) as number;
-    
-    // Create a color scale
-    const colorScale = d3.scaleSequential(d3.interpolateOranges).domain([0, maxChallenges * 1.2]);
+    const getInnovationScore = (stat: { challengesCount: number; activeProjects: number }) => {
+      return stat.challengesCount + (stat.activeProjects * 3);
+    };
+
+    const maxScore = (d3.max(districtStats, (d) => getInnovationScore(d)) || 1) as number;
+
+    // Create a color scale based on the combined innovation score
+    const colorScale = d3.scaleSequential(d3.interpolateOranges).domain([0, maxScore * 1.2]);
 
     const g = svg.append('g');
     const districtsGroup = g.append('g')
@@ -145,9 +149,10 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
         const distName = d.properties.Dist_Name || '';
         const normalized = normalizeDistrictName(distName);
         const stat = districtStats.find((s) => s.district.toLowerCase() === normalized);
-        // Base color if no challenges or no match
-        if (!stat || stat.challengesCount === 0) return '#FAF7F2';
-        return colorScale(stat.challengesCount);
+        if (!stat) return '#FAF7F2';
+        const score = getInnovationScore(stat);
+        if (score === 0) return '#FAF7F2';
+        return colorScale(score);
       })
       .attr('stroke', '#ffffff')
       .attr('stroke-width', 1)
@@ -170,7 +175,8 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
           tooltipRef.current.innerHTML = `
             <div class="font-editorial-serif text-lg font-bold text-stone-900 border-b border-stone-200 pb-1 mb-2">${stat?.district || distName}</div>
             <div class="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">Challenges: <strong class="text-stone-900 ml-1">${stat?.challengesCount || 0}</strong></div>
-            <div class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Active Projects: <strong class="text-stone-900 ml-1">${stat?.activeProjects || 0}</strong></div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">Active Projects: <strong class="text-stone-900 ml-1">${stat?.activeProjects || 0}</strong></div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-[#BC5434] border-t border-stone-100 pt-1 mt-1">Innovation Score: <strong class="text-stone-900 ml-1">${stat ? getInnovationScore(stat) : 0}</strong></div>
           `;
         }
       })
