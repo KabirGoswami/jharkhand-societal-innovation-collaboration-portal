@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
-import { INITIAL_UNIVERSITIES, INITIAL_INDUSTRY_PARTNERS } from '../data/jharkhandData';
+import { INITIAL_UNIVERSITIES, INITIAL_ORGANIZATIONS } from '../data/jharkhandData';
 
 interface MapProps {
   districtStats: { district: string; challengesCount: number; activeProjects: number }[];
@@ -51,7 +51,7 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
     // Create a combined GeoJSON object for projection fitting to ensure markers are included
     const institutionsWithCoordinates = [
       ...INITIAL_UNIVERSITIES,
-      ...INITIAL_INDUSTRY_PARTNERS,
+      ...INITIAL_ORGANIZATIONS,
     ].filter((institution: any) => {
       const coords = institution.locationCoords;
       return coords && Number.isFinite(coords.lng) && Number.isFinite(coords.lat);
@@ -207,7 +207,7 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
       // --- Render Institution Markers ---
       const allInstitutions = [
         ...INITIAL_UNIVERSITIES.map(u => ({ ...u, type: 'university', color: '#78350F', iconLabel: 'University' })),
-        ...INITIAL_INDUSTRY_PARTNERS.map(i => ({ ...i, type: 'industry', color: '#B91C1C', iconLabel: 'Industry' })),
+        ...INITIAL_ORGANIZATIONS.map(i => ({ ...i, type: 'industry', color: '#B91C1C', iconLabel: 'Industry' })),
       ].filter((institution: any) => {
         const coords = institution.locationCoords;
         return coords && Number.isFinite(coords.lng) && Number.isFinite(coords.lat);

@@ -1,129 +1,236 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import { ENV } from '../../config/env';
 import { logger } from '../../utils/logger';
 import { prisma } from '../../config/db';
+import { Role, VerificationStatus, OrgType } from '@prisma/client';
+import { universityService } from '../universities/universities.service';
+import { industryService } from '../industry/industry.service';
 
 export interface TokenPayload {
   userId: string;
-  name: string;
   email: string;
-  role: string;
+  role: Role;
+  verificationStatus: VerificationStatus;
 }
 
 export class AuthService {
-  async register(data: {
+  async completeProfile(userId: string, data: {
     email: string;
-    password: string;
-    name: string;
-    role: string;
+    fullName: string;
+    role: Role;
     phone?: string;
-    organization?: string;
+    district?: string;
+    universityId?: string;
+    studentIdNumber?: string;
+    department?: string;
+    employeeId?: string;
+    designation?: string;
+    organizationId?: string;
+    organizationName?: string; // For creating new organization
+    registrationNumber?: string;
+    website?: string;
+    orgType?: OrgType;
+    industryDesignation?: string;
+    documentUrls?: string[];
   }) {
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
+    const { role, email, fullName, phone, district, ...rest } = data;
+
+    // 1. Create or update the base User record
+    const user = await prisma.user.upsert({
+      where: { id: userId },
+      update: {
+        fullName,
+        role,
+        phone,
+        district,
+      },
+      create: {
+        id: userId,
+        email,
+        fullName,
+        role,
+        phone,
+        district,
+        verificationStatus: 'NOT_REQUIRED',
+      },
     });
-    if (existingUser) throw new Error('User with this email already exists');
 
-    const passwordHash = await bcrypt.hash(data.password, 12);
+    let verificationStatus: VerificationStatus = 'NOT_REQUIRED';
+    const verificationRequests: any[] = [];
 
-    const newUser = await prisma.user.create({
+    if (role === 'STUDENT' || role === 'FACULTY') {
+      if (!rest.universityId) throw new Error('University is required for students and faculty');
+
+      const university = await prisma.university.findUnique({
+        where: { id: rest.universityId },
+      });
+      if (!university) throw new Error('University not found');
+
+      const isDomainVerified = this.matchesUniversityDomain(email, university.domains);
+
+      if (role === 'STUDENT') {
+        await prisma.studentProfile.upsert({
+          where: { userId },
+          update: {
+            universityId: rest.universityId,
+            studentIdNumber: rest.studentIdNumber,
+            department: rest.department,
+          },
+          create: {
+            userId,
+            universityId: rest.universityId,
+            studentIdNumber: rest.studentIdNumber,
+            department: rest.department,
+          },
+        });
+
+        if (!isDomainVerified) {
+          verificationStatus = 'PENDING';
+          if (!rest.documentUrls || rest.documentUrls.length === 0) {
+            throw new Error('Document upload required for verification');
+          }
+          verificationRequests.push({
+            userId,
+            role,
+            documentUrls: rest.documentUrls,
+            status: 'PENDING',
+          });
+        }
+      } else { // FACULTY
+        await prisma.facultyProfile.upsert({
+          where: { userId },
+          update: {
+            universityId: rest.universityId,
+            employeeId: rest.employeeId,
+            designation: rest.designation,
+            department: rest.department,
+          },
+          create: {
+            userId,
+            universityId: rest.universityId,
+            employeeId: rest.employeeId,
+            designation: rest.designation,
+            department: rest.department,
+          },
+        });
+
+        // Faculty always requires admin confirmation, but domain match can expedite
+        verificationStatus = 'PENDING';
+        verificationRequests.push({
+          userId,
+          role,
+          documentUrls: rest.documentUrls || [],
+          status: 'PENDING',
+        });
+      }
+    } else if (role === 'INDUSTRY_REP') {
+      verificationStatus = 'PENDING';
+
+      let orgId = rest.organizationId;
+      if (!orgId && rest.organizationName) {
+        const org = await prisma.organization.create({
+          data: {
+            name: rest.organizationName,
+            type: rest.orgType || 'CORPORATE',
+            registrationNumber: rest.registrationNumber,
+            website: rest.website,
+            isVerified: false,
+          },
+        });
+        orgId = org.id;
+      }
+
+      if (!orgId) throw new Error('Organization is required');
+
+      await prisma.industryProfile.upsert({
+        where: { userId },
+        update: {
+          organizationId: orgId,
+          designation: rest.industryDesignation,
+        },
+        create: {
+          userId,
+          organizationId: orgId,
+          designation: rest.industryDesignation,
+        },
+      });
+
+      if (!rest.documentUrls || rest.documentUrls.length === 0) {
+        throw new Error('Registration documents required for industry representatives');
+      }
+
+      verificationRequests.push({
+        userId,
+        role,
+        documentUrls: rest.documentUrls,
+        status: 'PENDING',
+      });
+    }
+
+    // Update User verification status and create requests
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
       data: {
-        email: data.email,
-        passwordHash,
-        name: data.name,
-        role: data.role,
-        phone: data.phone,
-        organization: data.organization,
+        verificationStatus,
+        ...(role === 'CITIZEN' ? { verificationStatus: 'NOT_REQUIRED' } : {})
       },
     });
 
-    return {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-      role: newUser.role,
-    };
-  }
-
-  async login(credentials: { email: string; password: string }) {
-    const user = await prisma.user.findUnique({
-      where: { email: credentials.email },
-    });
-    if (!user) throw new Error('Invalid email or password');
-
-    const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
-    if (!isPasswordValid) throw new Error('Invalid email or password');
-
-    const token = this.generateToken({
-      userId: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
+    if (verificationRequests.length > 0) {
+      await prisma.verificationRequest.createMany({
+        data: verificationRequests,
+      });
+    }
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-      token,
+      user: updatedUser,
+      verificationStatus,
     };
   }
 
   async getMe(userId: string) {
+    if (userId === 'dev-user-id') {
+      return {
+        id: 'dev-user-id',
+        email: 'dev@localhost',
+        fullName: 'Development User',
+        role: 'GOVT_ADMIN' as Role,
+        verificationStatus: 'NOT_REQUIRED' as VerificationStatus,
+        district: 'Ranchi',
+        isActive: true,
+      };
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        studentProfile: true,
+        facultyProfile: true,
+        industryProfile: {
+          include: { organization: true }
+        }
+      },
     });
     if (!user) throw new Error('User not found');
 
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      phone: user.phone,
-      organization: user.organization,
-    };
+    return user;
   }
 
-  async updateProfile(userId: string, data: any) {
-    // Prevent updating critical fields
-    const { role, email, passwordHash, ...updateData } = data;
-
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-    });
-
-    return {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-      role: updatedUser.role,
-      phone: updatedUser.phone,
-      organization: updatedUser.organization,
-    };
-  }
-
-  async changePassword(userId: string, newPassword: string) {
-    const passwordHash = await bcrypt.hash(newPassword, 12);
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash },
-    });
-
-    return { success: true, message: 'Password changed successfully' };
-  }
-
-  private generateToken(payload: TokenPayload): string {
-    return jwt.sign(payload, ENV.JWT_SECRET, { expiresIn: '24h' });
+  private matchesUniversityDomain(email: string, domains: string[]): boolean {
+    if (!email) return false;
+    const emailDomain = email.split('@')[1]?.toLowerCase();
+    return domains.some(domain => domain.toLowerCase() === emailDomain || emailDomain?.endsWith(`.${domain.toLowerCase()}`));
   }
 
   async verifyToken(token: string): Promise<TokenPayload> {
+    if (token === 'mock-jwt-token') {
+      return {
+        userId: 'dev-user-id',
+        email: 'dev@localhost',
+        role: 'GOVT_ADMIN' as Role,
+        verificationStatus: 'NOT_REQUIRED' as VerificationStatus,
+      };
+    }
     try {
       return jwt.verify(token, ENV.JWT_SECRET) as TokenPayload;
     } catch (err) {

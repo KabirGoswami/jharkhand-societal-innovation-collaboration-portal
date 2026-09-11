@@ -5,6 +5,7 @@ import { useLanguage } from '../LanguageContext';
 import { useAppContext } from '../AppContext';
 import { NotificationPanel } from './NotificationPanel';
 import { ProblemDetailsModal } from './ProblemDetailsModal';
+import { VerificationBanner } from './VerificationBanner';
 
 export function Layout() {
   const { language, setLanguage, t } = useLanguage();
@@ -103,6 +104,7 @@ export function Layout() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <VerificationBanner />
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-28 text-stone-600">
             <Loader2 className="w-8 h-8 animate-spin text-[#BC5434] mb-3" />

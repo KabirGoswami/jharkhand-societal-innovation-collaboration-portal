@@ -116,8 +116,8 @@ export interface ProblemStatement {
   assignedHeiName?: string;
   assignedDepartment?: string;
   assignedTeamId?: string;
-  partnerIndustryId?: string;
-  partnerIndustryName?: string;
+  partnerOrgId?: string;
+  partnerOrgName?: string;
   fundingAmount?: number;
   createdAt: string;
   updatedAt: string;
@@ -153,9 +153,10 @@ export interface University {
   establishedYear: number;
   website: string;
   locationCoords: LocationCoords;
+  domains: string[];
 }
 
-export interface IndustryPartner {
+export interface Organization {
   id: string;
   name: string;
   type: 'Industry' | 'Startup' | 'MSME' | 'CSR Foundation' | 'Research Lab';
@@ -212,8 +213,8 @@ export interface SolutionProposal {
   };
   milestones: ProjectMilestone[];
   ipPotential: 'Patentable Technology' | 'Open-Source Public Good' | 'Process Copyright' | 'Grassroots Spinoff';
-  industryPartnerId?: string;
-  industryPartnerName?: string;
+  partnerOrgId?: string;
+  partnerOrgName?: string;
   status: 'draft' | 'submitted' | 'faculty_approved' | 'industry_partnered' | 'pilot_approved';
   createdAt: string;
 }

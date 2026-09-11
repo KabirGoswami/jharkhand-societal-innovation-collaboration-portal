@@ -1,36 +1,69 @@
 // Jharkhand Societal Innovation Collaboration Portal
-// Prisma Schema — SQLite
+// Prisma Schema — PostgreSQL
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
 }
 
-// ─── Models ──────────────────────────────────────────────
+// ─── Enums ──────────────────────────────────────────────────
+
+enum Role {
+  CITIZEN
+  STUDENT
+  FACULTY
+  INDUSTRY_REP
+  UNIVERSITY_ADMIN
+  GOVERNMENT_ADMIN
+  SUPER_ADMIN
+}
+
+enum VerificationStatus {
+  NOT_REQUIRED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum OrgType {
+  STARTUP
+  MSME
+  CSR
+  RESEARCH_LAB
+  CORPORATE
+}
+
+// ─── Models ──────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  passwordHash  String
-  name          String
-  role          String    @default("CITIZEN")
-  phone         String?
-  organization  String?
-  avatarUrl     String?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String             @id // must equal Supabase auth.users.id
+  email              String?            @unique
+  phone              String?            @unique
+  fullName           String
+  role               Role
+  verificationStatus VerificationStatus @default(NOT_REQUIRED)
+  district           String?            // citizens: for Jharkhand geo-targeting/dashboards
+  avatarUrl          String?
+  isActive           Boolean            @default(true)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   // Relations
-  submittedProblems  Problem[]
-  discussions        Discussion[]
-  notifications      Notification[]  @relation("NotificationRecipient")
-  auditLogs          AuditLog[]
+  submittedProblems    Problem[]
+  discussions          Discussion[]
+  notifications        Notification[]  @relation("NotificationRecipient")
+  auditLogs            AuditLog[]
+
+  studentProfile       StudentProfile?
+  facultyProfile       FacultyProfile?
+  industryProfile      IndustryProfile?
+  verificationRequests VerificationRequest[] @relation("RequestOwner")
+  reviewedRequests     VerificationRequest[] @relation("Reviewer")
 
   @@index([role])
   @@index([email])
@@ -73,9 +106,9 @@ model Problem {
   assignedDepartment   String?
 
   // Industry Partner
-  partnerIndustryId    String?
-  partnerIndustry      IndustryPartner? @relation(fields: [partnerIndustryId], references: [id])
-  partnerIndustryName  String?
+  partnerOrgId        String?
+  partnerOrg          Organization?  @relation(fields: [partnerOrgId], references: [id])
+  partnerOrgName       String?
   fundingAmount        Float?
 
   // Relations
@@ -152,50 +185,92 @@ model University {
   studentResearchersCount Int            @default(0)
   rating                 Float           @default(0)
   logoUrl                String?
+  domains                String[]        // Registered domains for auto-verification
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
 
   // Relations
-  facultyMentors         FacultyMentor[]
+  students               StudentProfile[]
+  faculty                FacultyProfile[]
   assignedProblems       Problem[]
   proposals              SolutionProposal[]
 
   @@index([district])
 }
 
-model FacultyMentor {
-  id              String      @id @default(uuid())
-  universityId    String
-  university      University  @relation(fields: [universityId], references: [id], onDelete: Cascade)
-  name            String
-  designation     String
-  department      String
-  email           String
-  specialization  String
+model Organization {
+  id                 String   @id @default(uuid())
+  name               String
+  type               OrgType
+  registrationNumber String?  // GSTIN / CIN
+  website            String?
+  isVerified         Boolean  @default(false)
 
-  @@index([universityId])
-}
+  // Keep some of the old IndustryPartner fields for backward compatibility if needed,
+  // but the prompt specified these core ones.
+  focusDomains       Json?
+  headquarters       String?
+  csrBudgetCommitted Float?   @default(0)
+  availableMentors   Int?     @default(0)
+  activeCollaborations Int?   @default(0)
+  description        String?
+  pilotTestSites     Json?
+  contactPerson      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-model IndustryPartner {
-  id                    String              @id @default(uuid())
-  name                  String
-  type                  String
-  focusDomains          Json
-  headquarters          String
-  csrBudgetCommitted    Float               @default(0)
-  availableMentors      Int                 @default(0)
-  activeCollaborations  Int                 @default(0)
-  description           String?
-  pilotTestSites        Json
-  contactPerson         String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-
-  // Relations
-  problems              Problem[]
-  proposals             SolutionProposal[]
+  members            IndustryProfile[]
+  problems           Problem[]
+  proposals          SolutionProposal[]
 
   @@index([type])
+}
+
+model StudentProfile {
+  userId          String     @id
+  user            User       @relation(fields: [userId], references: [id])
+  universityId    String
+  university      University @relation(fields: [universityId], references: [id])
+  studentIdNumber String?
+  department      String?
+  verifiedById    String?
+  verifiedAt      DateTime?
+}
+
+model FacultyProfile {
+  userId       String     @id
+  user         User       @relation(fields: [userId], references: [id])
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+  employeeId   String?
+  designation  String?
+  department   String?
+  verifiedById String?
+  verifiedAt   DateTime?
+}
+
+model IndustryProfile {
+  userId         String       @id
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  designation    String?
+  verifiedById   String?
+  verifiedAt     DateTime?
+}
+
+model VerificationRequest {
+  id            String             @id @default(uuid())
+  userId        String
+  user          User               @relation("RequestOwner", fields: [userId], references: [id])
+  role          Role
+  documentUrls  String[]           // Supabase Storage paths
+  status        VerificationStatus @default(PENDING)
+  reviewerNotes String?
+  reviewedById  String?
+  reviewer      User?             @relation("Reviewer", fields: [reviewedById], references: [id])
+  reviewedAt    DateTime?
+  createdAt     DateTime           @default(now())
 }
 
 model SolutionProposal {
@@ -235,9 +310,9 @@ model SolutionProposal {
   budgetTotal           Float           @default(0)
 
   // Industry Partner
-  industryPartnerId     String?
-  industryPartner       IndustryPartner? @relation(fields: [industryPartnerId], references: [id])
-  industryPartnerName   String?
+  partnerOrgId           String?
+  partnerOrg             Organization? @relation(fields: [partnerOrgId], references: [id])
+  partnerOrgName         String?
 
   // Relations
   milestones            ProjectMilestone[]

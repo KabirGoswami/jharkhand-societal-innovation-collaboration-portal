@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import {
   ProblemStatement,
   AnalyticsSummary,
@@ -23,8 +24,6 @@ interface AppContextType {
   notifications: SystemNotification[];
 
   // User & UI state
-  userRole: 'citizen' | 'university' | 'industry' | 'admin';
-  setUserRole: React.Dispatch<React.SetStateAction<'citizen' | 'university' | 'industry' | 'admin'>>;
   selectedProblem: ProblemStatement | null;
   setSelectedProblem: React.Dispatch<React.SetStateAction<ProblemStatement | null>>;
   trackingFilterCode: string;
@@ -65,7 +64,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<SystemNotification[]>([]);
 
   // User & UI state
-  const [userRole, setUserRole] = useState<'citizen' | 'university' | 'industry' | 'admin'>('citizen');
   const [selectedProblem, setSelectedProblem] = useState<ProblemStatement | null>(null);
   const [trackingFilterCode, setTrackingFilterCode] = useState<string>('');
   const [mapFilter, setMapFilter] = useState<{ type: 'district' | 'university' | 'industry'; value: string } | null>(null);
@@ -274,8 +272,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     proposals,
     setProposals,
     notifications,
-    userRole,
-    setUserRole,
     selectedProblem,
     setSelectedProblem,
     trackingFilterCode,

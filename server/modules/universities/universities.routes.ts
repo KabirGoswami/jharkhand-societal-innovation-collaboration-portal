@@ -1,14 +1,23 @@
 import { Router } from 'express';
 import { universityService } from './universities.service';
 import { sendResponse, sendError } from '../../utils/apiResponse';
-import { authenticate, roleGuard } from '../../middleware/auth';
+import { authenticate, requireRole } from '../../middleware/auth';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
   try {
+    const { search } = req.query;
     const universities = await universityService.getAllUniversities();
-    sendResponse(res, universities);
+
+    const filtered = search
+      ? universities.filter(u =>
+          u.name.toLowerCase().includes(String(search).toLowerCase()) ||
+          u.shortName.toLowerCase().includes(String(search).toLowerCase())
+        )
+      : universities;
+
+    sendResponse(res, filtered);
   } catch (err: any) {
     sendError(res, err.message);
   }
@@ -26,7 +35,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', authenticate, roleGuard('GOVT_ADMIN'), async (req, res) => {
+router.post('/', authenticate, requireRole('GOVT_ADMIN'), async (req, res) => {
   try {
     const university = await universityService.createUniversity(req.body);
     sendResponse(res, university, 201);
@@ -35,7 +44,7 @@ router.post('/', authenticate, roleGuard('GOVT_ADMIN'), async (req, res) => {
   }
 });
 
-router.patch('/:id', authenticate, roleGuard('GOVT_ADMIN', 'UNIVERSITY_ADMIN'), async (req, res) => {
+router.patch('/:id', authenticate, requireRole('GOVT_ADMIN', 'UNIVERSITY_ADMIN'), async (req, res) => {
   try {
     const university = await universityService.updateUniversity(req.params.id, req.body);
     sendResponse(res, university);
@@ -44,7 +53,7 @@ router.patch('/:id', authenticate, roleGuard('GOVT_ADMIN', 'UNIVERSITY_ADMIN'), 
   }
 });
 
-router.delete('/:id', authenticate, roleGuard('GOVT_ADMIN'), async (req, res) => {
+router.delete('/:id', authenticate, requireRole('GOVT_ADMIN'), async (req, res) => {
   try {
     await universityService.deleteUniversity(req.params.id);
     sendResponse(res, { success: true, message: 'University deleted' });

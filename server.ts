@@ -18,6 +18,7 @@ import discussionsRoutes from './server/modules/discussions/discussions.routes';
 import authRoutes from './server/modules/auth/auth.routes';
 import notificationsRoutes from './server/modules/notifications/notifications.routes';
 import mediaRoutes from './server/modules/media/media.routes';
+import verificationRoutes from './server/modules/verification/verification.routes';
 import { setupSwagger } from './server/utils/swagger';
 
 dotenv.config();
@@ -46,6 +47,7 @@ async function startServer() {
   app.use('/api/auth', authRoutes);
   app.use('/api/notifications', notificationsRoutes);
   app.use('/api/media', mediaRoutes);
+  app.use('/api/verification', verificationRoutes);
 
   // Swagger Documentation
   setupSwagger(app);

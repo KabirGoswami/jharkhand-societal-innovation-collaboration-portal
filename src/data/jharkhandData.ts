@@ -1,4 +1,4 @@
-import { University, IndustryPartner, ProblemStatement, AnalyticsSummary, DomainTheme, District, SolutionProposal } from '../types';
+import { University, Organization, ProblemStatement, AnalyticsSummary, DomainTheme, District, SolutionProposal } from '../types';
 
 export const JHARKHAND_DISTRICTS: District[] = [
   'Ranchi',
@@ -61,6 +61,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-102', name: 'Dr. Anand Kumar Verma', designation: 'Associate Professor', department: 'Electronics & IoT', email: 'akverma@bitmesra.ac.in', specialization: 'Embedded Sensor Networks & Drone Telemetry' },
     ],
     locationCoords: { lat: 23.425, lng: 85.445 },
+    domains: ['bitmesra.ac.in', 'students.bitmesra.ac.in'],
   },
   {
     id: 'hei-iit-ism-dhanbad',
@@ -81,6 +82,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-202', name: 'Dr. Srikant Senapati', designation: 'Professor', department: 'Applied Geophysics', email: 'ssenapati@iitism.ac.in', specialization: 'Deep Aquifer Electrical Resistivity & Subsidence Modeling' },
     ],
     locationCoords: { lat: 23.794, lng: 86.443 },
+    domains: ['iitism.ac.in', 'students.iitism.ac.in'],
   },
   {
     id: 'hei-bau-ranchi',
@@ -101,6 +103,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-302', name: 'Dr. Pragya Kispotta', designation: 'Associate Professor', department: 'Horticulture & Post-Harvest', email: 'pkispotta@bauranchi.org', specialization: 'Solar Dehydration & Non-Timber Forest Produce Value Addition' },
     ],
     locationCoords: { lat: 23.350, lng: 85.270 },
+    domains: ['bauranchi.org', 'students.bauranchi.org'],
   },
   {
     id: 'hei-nit-jamshedpur',
@@ -121,6 +124,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-402', name: 'Dr. Shalini Srivastava', designation: 'Associate Professor', department: 'Civil & Environmental', email: 'ssrivastava@nitjsr.ac.in', specialization: 'Heavy Metal Slag Utilization in Paving & Industrial Water Recirculation' },
     ],
     locationCoords: { lat: 22.750, lng: 86.202 },
+    domains: ['nitjsr.ac.in', 'students.nitjsr.ac.in'],
   },
   {
     id: 'hei-cuj-ranchi',
@@ -140,6 +144,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-501', name: 'Dr. Alok Kumar Gupta', designation: 'Professor', department: 'Energy Engineering', email: 'akgupta@cuj.ac.in', specialization: 'Decentralized Solar Thermal Storage & Micro-hydel Systems' },
     ],
     locationCoords: { lat: 23.410, lng: 85.310 },
+    domains: ['cuj.ac.in', 'students.cuj.ac.in'],
   },
   {
     id: 'hei-aiims-deoghar',
@@ -159,6 +164,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-601', name: 'Dr. Saurabh Pandey', designation: 'Addl Professor', department: 'Community Medicine & Family Health', email: 'spandey@aiimsdeoghar.edu.in', specialization: 'Maternal Nutrition, Sickle Cell Anemia Diagnostics & Tribal Telemedicine' },
     ],
     locationCoords: { lat: 24.492, lng: 86.700 },
+    domains: ['aiimsdeoghar.edu.in', 'students.aiimsdeoghar.edu.in'],
   },
   {
     id: 'hei-skmu-dumka',
@@ -178,6 +184,7 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-701', name: 'Dr. Nirmal Murmu', designation: 'Head of Department', department: 'Zoology & Sericulture', email: 'nmurmu@skmu.ac.in', specialization: 'Organic Tussar Silk Cultivation, Cocoon Reeling & Disease Prevention' },
     ],
     locationCoords: { lat: 24.273, lng: 87.287 },
+    domains: ['skmu.ac.in', 'students.skmu.ac.in'],
   },
   {
     id: 'hei-rims-ranchi',
@@ -197,10 +204,11 @@ export const INITIAL_UNIVERSITIES: University[] = [
       { id: 'fm-801', name: 'Dr. Vivek Kashyap', designation: 'Professor & Head', department: 'Preventive & Social Medicine', email: 'vkashyap@rimsranchi.ac.in', specialization: 'Vector-borne Disease Surveillance & Arsenic Biomonitoring' },
     ],
     locationCoords: { lat: 23.330, lng: 85.310 },
+    domains: ['rimsranchi.ac.in', 'students.rimsranchi.ac.in'],
   },
 ];
 
-export const INITIAL_INDUSTRY_PARTNERS: IndustryPartner[] = [
+export const INITIAL_ORGANIZATIONS: Organization[] = [
   {
     id: 'ind-tata-steel',
     name: 'Tata Steel Foundation & CSR',
@@ -329,8 +337,8 @@ export const INITIAL_PROBLEM_STATEMENTS: ProblemStatement[] = [
     assignedHeiId: 'hei-bit-mesra',
     assignedHeiName: 'BIT Mesra',
     assignedDepartment: 'Civil & Water Resources',
-    partnerIndustryId: 'ind-tata-steel',
-    partnerIndustryName: 'Tata Steel Foundation & CSR',
+    partnerOrgId: 'ind-tata-steel',
+    partnerOrgName: 'Tata Steel Foundation & CSR',
     fundingAmount: 420000,
     createdAt: '2026-08-12T10:30:00Z',
     updatedAt: '2026-09-02T14:20:00Z',
@@ -377,8 +385,8 @@ export const INITIAL_PROBLEM_STATEMENTS: ProblemStatement[] = [
     assignedHeiId: 'hei-iit-ism-dhanbad',
     assignedHeiName: 'IIT (ISM) Dhanbad',
     assignedDepartment: 'Environmental Science & Engg',
-    partnerIndustryId: 'ind-bccl-coal-india',
-    partnerIndustryName: 'Bharat Coking Coal Limited (Coal India CSR)',
+    partnerOrgId: 'ind-bccl-coal-india',
+    partnerOrgName: 'Bharat Coking Coal Limited (Coal India CSR)',
     fundingAmount: 850000,
     createdAt: '2026-08-18T09:15:00Z',
     updatedAt: '2026-09-04T11:00:00Z',
@@ -425,8 +433,8 @@ export const INITIAL_PROBLEM_STATEMENTS: ProblemStatement[] = [
     assignedHeiId: 'hei-bau-ranchi',
     assignedHeiName: 'BAU Ranchi',
     assignedDepartment: 'Horticulture & Post-Harvest',
-    partnerIndustryId: 'ind-jslps-palash',
-    partnerIndustryName: 'Jharkhand State Livelihood Promotion Society (Palash)',
+    partnerOrgId: 'ind-jslps-palash',
+    partnerOrgName: 'Jharkhand State Livelihood Promotion Society (Palash)',
     fundingAmount: 320000,
     createdAt: '2026-08-20T14:40:00Z',
     updatedAt: '2026-09-05T16:30:00Z',
@@ -472,8 +480,8 @@ export const INITIAL_PROBLEM_STATEMENTS: ProblemStatement[] = [
     assignedHeiId: 'hei-bau-ranchi',
     assignedHeiName: 'BAU Ranchi',
     assignedDepartment: 'Agronomy & Soil Science',
-    partnerIndustryId: 'ind-bioharvest-startup',
-    partnerIndustryName: 'BioHarvest Agri-Innovations Pvt Ltd',
+    partnerOrgId: 'ind-bioharvest-startup',
+    partnerOrgName: 'BioHarvest Agri-Innovations Pvt Ltd',
     fundingAmount: 250000,
     createdAt: '2026-08-25T11:00:00Z',
     updatedAt: '2026-09-03T09:45:00Z',
@@ -520,8 +528,8 @@ export const INITIAL_PROBLEM_STATEMENTS: ProblemStatement[] = [
     assignedHeiId: 'hei-nit-jamshedpur',
     assignedHeiName: 'NIT Jamshedpur',
     assignedDepartment: 'Civil & Environmental',
-    partnerIndustryId: 'ind-tata-steel',
-    partnerIndustryName: 'Tata Steel Foundation & CSR',
+    partnerOrgId: 'ind-tata-steel',
+    partnerOrgName: 'Tata Steel Foundation & CSR',
     fundingAmount: 500000,
     createdAt: '2026-08-28T08:20:00Z',
     updatedAt: '2026-09-05T12:10:00Z',
@@ -568,8 +576,8 @@ export const INITIAL_PROBLEM_STATEMENTS: ProblemStatement[] = [
     assignedHeiId: 'hei-cuj-ranchi',
     assignedHeiName: 'CUJ Ranchi',
     assignedDepartment: 'Centre for Tribal Folklore & Livelihood',
-    partnerIndustryId: 'ind-cmpdi',
-    partnerIndustryName: 'Central Mine Planning and Design Institute (CMPDI)',
+    partnerOrgId: 'ind-cmpdi',
+    partnerOrgName: 'Central Mine Planning and Design Institute (CMPDI)',
     fundingAmount: 380000,
     createdAt: '2026-09-01T15:00:00Z',
     updatedAt: '2026-09-06T08:00:00Z',
@@ -617,8 +625,8 @@ export const INITIAL_SOLUTION_PROPOSALS: SolutionProposal[] = [
       { id: 'm-4', title: 'Community Handover & Local Jal Doot Training', stage: 'Community Pilot', durationWeeks: 3, status: 'pending', deliverable: 'Panchayat SOP and maintenance manual in Hindi and Mundari' },
     ],
     ipPotential: 'Patentable Technology',
-    industryPartnerId: 'ind-tata-steel',
-    industryPartnerName: 'Tata Steel Foundation & CSR',
+    partnerOrgId: 'ind-tata-steel',
+    partnerOrgName: 'Tata Steel Foundation & CSR',
     status: 'industry_partnered',
     createdAt: '2026-08-16T12:00:00Z',
   },
@@ -658,8 +666,8 @@ export const INITIAL_SOLUTION_PROPOSALS: SolutionProposal[] = [
       { id: 'm-204', title: 'Community Ambient Air Quality Dashboard Handover to BCCL', stage: 'Community Pilot', durationWeeks: 4, status: 'pending', deliverable: 'Open-access public telemetry portal for local wards' },
     ],
     ipPotential: 'Patentable Technology',
-    industryPartnerId: 'ind-bccl-coal-india',
-    industryPartnerName: 'Bharat Coking Coal Limited (Coal India CSR)',
+    partnerOrgId: 'ind-bccl-coal-india',
+    partnerOrgName: 'Bharat Coking Coal Limited (Coal India CSR)',
     status: 'pilot_approved',
     createdAt: '2026-08-22T10:00:00Z',
   },
@@ -796,7 +804,7 @@ export const INITIAL_ANALYTICS: AnalyticsSummary = {
 
 export const INITIAL_PROBLEMS = INITIAL_PROBLEM_STATEMENTS;
 export const JHARKHAND_UNIVERSITIES = INITIAL_UNIVERSITIES;
-export const JHARKHAND_INDUSTRY_PARTNERS = INITIAL_INDUSTRY_PARTNERS;
+export const JHARKHAND_ORGANIZATIONS = INITIAL_ORGANIZATIONS;
 
 import { SystemNotification } from '../types';
 
@@ -832,7 +840,7 @@ export const INITIAL_NOTIFICATIONS: SystemNotification[] = [
     id: 'notif-4',
     type: 'info',
     title: 'NEP Experiential Credits Updated',
-    message: 'Your field testing phase for "Smart Elephant Repellent" has been verified. 4 Credits added to Academic Bank of Credits (ABC).',
+    message: 'Your field testing phase has been verified. 4 Credits added to Academic Bank of Credits (ABC).',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
     read: true,
     targetRole: 'Student Researcher',
@@ -845,5 +853,5 @@ export const INITIAL_NOTIFICATIONS: SystemNotification[] = [
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), // 3 days ago
     read: true,
     targetRole: 'Student Researcher',
-  }
+  },
 ];

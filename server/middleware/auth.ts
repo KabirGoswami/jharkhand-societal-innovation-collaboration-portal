@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService, TokenPayload } from '../modules/auth/auth.service';
 import { sendError } from '../utils/apiResponse';
+import { Role, VerificationStatus } from '@prisma/client';
 
 export interface AuthRequest extends Request {
   user?: TokenPayload;
@@ -11,9 +12,9 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   if (process.env.AUTH_BYPASS === 'true') {
     req.user = {
       userId: 'dev-user-id',
-      name: 'Development User',
-      role: 'GOVT_ADMIN', // Grant admin privileges for testing
       email: 'dev@localhost',
+      role: 'GOVT_ADMIN' as Role,
+      verificationStatus: 'NOT_REQUIRED' as VerificationStatus,
     };
     return next();
   }
@@ -35,9 +36,8 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
-export const roleGuard = (...allowedRoles: string[]) => {
+export const requireRole = (...allowedRoles: Role[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    // Bypass role guard if AUTH_BYPASS is explicitly set to 'true'
     if (process.env.AUTH_BYPASS === 'true') {
       return next();
     }
@@ -56,5 +56,27 @@ export const roleGuard = (...allowedRoles: string[]) => {
     }
 
     next();
+  };
+};
+
+// Backward-compatible alias used by existing route modules.
+export const roleGuard = requireRole;
+
+export const requireVerified = () => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (process.env.AUTH_BYPASS === 'true') {
+      return next();
+    }
+
+    if (!req.user) {
+      return sendError(res, 'User not authenticated', 401, 'UNAUTHORIZED');
+    }
+
+    // CITIZENS are considered verified by default (NOT_REQUIRED)
+    if (req.user.role === 'CITIZEN' || req.user.verificationStatus === 'VERIFIED' || req.user.verificationStatus === 'NOT_REQUIRED') {
+      return next();
+    }
+
+    return sendError(res, 'Verification required to access this resource', 403, 'VERIFICATION_PENDING');
   };
 };

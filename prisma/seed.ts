@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { OrgType, PrismaClient } from '@prisma/client';
 import {
   INITIAL_UNIVERSITIES,
-  INITIAL_INDUSTRY_PARTNERS,
+  INITIAL_ORGANIZATIONS,
   INITIAL_PROBLEM_STATEMENTS,
   INITIAL_SOLUTION_PROPOSALS,
   INITIAL_DISCUSSIONS
@@ -9,8 +9,30 @@ import {
 
 const prisma = new PrismaClient();
 
+const organizationTypeMap: Record<string, OrgType> = {
+  Industry: OrgType.CORPORATE,
+  'Research Lab': OrgType.RESEARCH_LAB,
+  'CSR Foundation': OrgType.CSR,
+  Startup: OrgType.STARTUP,
+};
+
 async function main() {
   console.log('🌱 Starting seeding process...');
+
+  // 0. Seed SUPER_ADMIN
+  console.log('🔑 Seeding Super Admin...');
+  await prisma.user.upsert({
+    where: { email: 'admin@jharkhand.gov.in' },
+    update: {},
+    create: {
+      id: 'super-admin-id', // In real app, this comes from Supabase Auth
+      email: 'admin@jharkhand.gov.in',
+      fullName: 'System Super Administrator',
+      role: 'SUPER_ADMIN',
+      verificationStatus: 'NOT_REQUIRED',
+      isActive: true,
+    },
+  });
 
   // 1. Universities
   console.log('🎓 Seeding Universities...');
@@ -33,38 +55,30 @@ async function main() {
         studentResearchersCount: uni.studentResearchersCount,
         rating: uni.rating,
         logoUrl: uni.logoUrl,
-        facultyMentors: {
-          create: uni.facultyMentors.map(fm => ({
-            id: fm.id,
-            name: fm.name,
-            designation: fm.designation,
-            department: fm.department,
-            email: fm.email,
-            specialization: fm.specialization,
-          })),
-        },
+        domains: uni.domains,
       },
     });
   }
 
-  // 2. Industry Partners
-  console.log('🏭 Seeding Industry Partners...');
-  for (const ind of INITIAL_INDUSTRY_PARTNERS) {
-    await prisma.industryPartner.upsert({
-      where: { id: ind.id },
+  // 2. Organizations (formerly Industry Partners)
+  console.log('🏭 Seeding Organizations...');
+  for (const org of INITIAL_ORGANIZATIONS) {
+    await prisma.organization.upsert({
+      where: { id: org.id },
       update: {},
       create: {
-        id: ind.id,
-        name: ind.name,
-        type: ind.type,
-        focusDomains: JSON.stringify(ind.focusDomains),
-        headquarters: ind.headquarters,
-        csrBudgetCommitted: ind.csrBudgetCommitted,
-        availableMentors: ind.availableMentors,
-        activeCollaborations: ind.activeCollaborations,
-        description: ind.description,
-        pilotTestSites: JSON.stringify(ind.pilotTestSites),
-        contactPerson: ind.contactPerson,
+        id: org.id,
+        name: org.name,
+        type: organizationTypeMap[org.type],
+        focusDomains: JSON.stringify(org.focusDomains),
+        headquarters: org.headquarters,
+        csrBudgetCommitted: org.csrBudgetCommitted,
+        availableMentors: org.availableMentors,
+        activeCollaborations: org.activeCollaborations,
+        description: org.description,
+        pilotTestSites: JSON.stringify(org.pilotTestSites),
+        contactPerson: org.contactPerson,
+        isVerified: true, // Seeded data is verified
       },
     });
   }
@@ -102,8 +116,8 @@ async function main() {
         assignedHeiId: prob.assignedHeiId,
         assignedHeiName: prob.assignedHeiName,
         assignedDepartment: prob.assignedDepartment,
-        partnerIndustryId: prob.partnerIndustryId,
-        partnerIndustryName: prob.partnerIndustryName,
+        partnerOrgId: prob.partnerOrgId,
+        partnerOrgName: prob.partnerOrgName,
         fundingAmount: prob.fundingAmount,
         aiAnalysis: {
           create: {
@@ -176,8 +190,8 @@ async function main() {
         budgetTravel: prop.budgetBreakdown?.travelAndLogistics,
         budgetContingency: prop.budgetBreakdown?.contingency,
         budgetTotal: prop.budgetBreakdown?.totalAmount,
-        industryPartnerId: prop.industryPartnerId,
-        industryPartnerName: prop.industryPartnerName,
+        partnerOrgId: prop.partnerOrgId,
+        partnerOrgName: prop.partnerOrgName,
         milestones: {
           create: prop.milestones.map(m => ({
             id: m.id,
