@@ -149,15 +149,7 @@ export const JharkhandMap: React.FC<MapProps> = ({ districtStats, onSelectDistri
   }, [geoData, districtStats, onSelectDistrict]);
 
   if (error) return <div className="p-8 text-center text-sm text-red-500 font-medium">Map data failed to load.</div>;
-  if (loading) return (
-    <div className="p-8 h-[300px] flex items-center justify-center text-sm text-stone-500">
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-5 h-5 border-2 border-stone-300 border-t-[#BC5434] rounded-full animate-spin"></div>
-        <span>Loading map geometry...</span>
-      </div>
-    </div>
-  );
-
+  
   return (
     <div className="relative w-full h-full min-h-[300px] md:min-h-[400px]">
       <svg ref={svgRef} className="w-full h-full drop-shadow-sm"></svg>

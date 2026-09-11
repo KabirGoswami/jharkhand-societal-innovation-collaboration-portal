@@ -43,8 +43,16 @@ export const IndustryModule: React.FC<IndustryModuleProps> = ({
 
   const currentPartner = industryPartners.find((p) => p.id === selectedPartnerId) || industryPartners[0];
 
+  if (!currentPartner) {
+    return (
+      <div className="flex items-center justify-center py-20 text-stone-500 font-serif italic">
+        Loading industry partner data...
+      </div>
+    );
+  }
+
   // Total funds pledged across Jharkhand
-  const totalPledgedLakhs = industryPartners.reduce((acc, p) => acc + p.csrBudgetCommitted, 0);
+  const totalPledgedLakhs = industryPartners.reduce((acc, p) => acc + (p.csrBudgetCommitted || 0), 0);
 
   const handleOpenPledge = (proposal: SolutionProposal) => {
     setPledgingProposal(proposal);

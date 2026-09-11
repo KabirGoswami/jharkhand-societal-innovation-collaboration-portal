@@ -143,7 +143,7 @@ export const CitizenSubmissionModal: React.FC<CitizenSubmissionModalProps> = ({
   const [description, setDescription] = useState('');
   const [priorAttempts, setPriorAttempts] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [mediaUrl, setMediaUrl] = useState('https://images.unsplash.com/photo-1541888946425-d0fbb18086f7?auto=format&fit=crop&w=800&q=80');
+  const [mediaUrl, setMediaUrl] = useState('');
 
   // AI Analysis result cache
   const [aiResult, setAiResult] = useState<AIAnalysisResult | null>(null);
@@ -164,7 +164,7 @@ export const CitizenSubmissionModal: React.FC<CitizenSubmissionModalProps> = ({
     setUrgency('Critical');
     setDescription('Groundwater in several panchayats of Udhwa block is highly contaminated with arsenic, leading to widespread skin lesions, digestive issues, and suspected cancer cases among the villagers. The existing hand pumps are drawing water from shallow aquifers which are severely affected.');
     setPriorAttempts('Previously, some deep tube wells were bored, but due to lack of maintenance and geological shifting, they are also showing traces of arsenic. Small household filters were distributed but filters saturated quickly and were not replaced.');
-    setMediaUrl('https://images.unsplash.com/photo-1541888946425-d0fbb18086f7?auto=format&fit=crop&w=800&q=80');
+    setMediaUrl('');
   };
 
   // Image Upload Handler
@@ -233,8 +233,12 @@ export const CitizenSubmissionModal: React.FC<CitizenSubmissionModalProps> = ({
           urgency,
         }),
       });
-      const data = await res.json();
-      setAiResult(data);
+      const responseBody = await res.json();
+      if (!res.ok) {
+        throw new Error(responseBody?.error?.message || `AI evaluation failed (${res.status})`);
+      }
+
+      setAiResult(responseBody?.data || responseBody);
       setStep(3);
     } catch (err) {
       console.error('AI evaluation failed:', err);
@@ -248,6 +252,10 @@ export const CitizenSubmissionModal: React.FC<CitizenSubmissionModalProps> = ({
   const handleSubmitProblem = async () => {
     setIsSubmitting(true);
     try {
+      const normalizedAiAnalysis = aiResult && 'category' in aiResult
+        ? aiResult
+        : (aiResult as any)?.data || undefined;
+
       const payload = {
         title,
         description: description + (priorAttempts ? `\n\n[Prior Attempts & Root Causes: ${priorAttempts}]` : ''),
@@ -270,7 +278,7 @@ export const CitizenSubmissionModal: React.FC<CitizenSubmissionModalProps> = ({
         affectedPopulation: Number(affectedPopulation) || 1000,
         mediaUrls: [mediaUrl],
         videoUrl: videoUrl || undefined,
-        aiAnalysis: aiResult || undefined,
+        aiAnalysis: normalizedAiAnalysis,
       };
 
       const res = await fetch('/api/problems', {
@@ -279,16 +287,17 @@ export const CitizenSubmissionModal: React.FC<CitizenSubmissionModalProps> = ({
         body: JSON.stringify(payload),
       });
 
+      const responseBody = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error('Failed to submit challenge');
+        throw new Error(responseBody?.error?.message || `Submission failed (${res.status})`);
       }
 
-      const problemData = await res.json();
+      const problemData = responseBody?.data || responseBody;
       setCreatedProblem(problemData);
       onSuccess(problemData);
     } catch (err) {
       console.error('Submission error:', err);
-      alert('Failed to submit problem. Please try again.');
+      alert(err instanceof Error ? err.message : 'Failed to submit problem. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

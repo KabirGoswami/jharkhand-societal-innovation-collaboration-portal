@@ -4,38 +4,106 @@ import { problemsService } from '../problems/problems.service';
 
 export class ProposalService {
   async createProposal(data: any) {
-    const {
-      facultyMentor,
-      studentTeam,
-      budgetBreakdown,
-      ...rest
-    } = data;
+    console.log('--- PROPOSAL CREATION START ---');
+    console.log('Incoming request payload:', JSON.stringify(data, null, 2));
+    try {
+      const {
+        facultyMentor,
+        studentTeam,
+        budgetBreakdown,
+        milestones,
+        ...rest
+      } = data;
 
-    const newProposal = await prisma.solutionProposal.create({
-      data: {
-        ...rest,
-        mentorName: facultyMentor?.name,
-        mentorDepartment: facultyMentor?.department,
-        mentorEmail: facultyMentor?.email,
-        teamLeadName: studentTeam?.leadName,
-        teamLeadEmail: studentTeam?.leadEmail,
-        teamMembersCount: studentTeam?.membersCount || 4,
-        teamDepartments: studentTeam?.departments || [],
-        budgetHardware: budgetBreakdown?.hardwareEquip || 0,
-        budgetPrototyping: budgetBreakdown?.prototyping || 0,
-        budgetFieldTesting: budgetBreakdown?.fieldTesting || 0,
-        budgetTravel: budgetBreakdown?.travelAndLogistics || 0,
-        budgetContingency: budgetBreakdown?.contingency || 0,
-        budgetTotal: budgetBreakdown?.totalAmount || 0,
-      },
-    });
+      if (!data.problemId || !data.heiId) {
+        throw new Error('Missing problemId or heiId in request payload.');
+      }
 
-    // Update associated problem status via problemsService
-    await problemsService.updateStatus(data.problemId, {
-      status: 'proposal_submitted',
-    });
+      const [problem, university] = await Promise.all([
+        prisma.problem.findUnique({ where: { id: data.problemId } }),
+        prisma.university.findUnique({ where: { id: data.heiId } }),
+      ]);
 
-    return this.mapProposal(newProposal);
+      if (!problem) {
+        throw new Error(`Problem with ID ${data.problemId} not found.`);
+      }
+      if (!university) {
+        throw new Error(`University with ID ${data.heiId} not found.`);
+      }
+
+      // STRICT SCHEMA ALIGNMENT
+      // Use scalar IDs directly for robustness
+      const prismaData: any = {
+        problemId: data.problemId,
+        heiId: data.heiId,
+        problemTitle: data.problemTitle || problem.title,
+        heiName: data.heiName || university.name,
+        projectTitle: data.projectTitle || 'Untitled Project',
+        abstract: data.abstract || 'No abstract provided',
+        technologyMethodology: data.technologyLogy || data.technologyMethodology || 'TBD',
+        nepExperientialCredits: parseInt(String(data.nepExperientialCredits || 6), 10),
+        ipPotential: data.ipPotential || 'PATENTABLE_TECHNOLOGY',
+        status: 'open_for_csr',
+        mentorName: facultyMentor?.name || 'TBD',
+        mentorDepartment: facultyMentor?.department || 'TBD',
+        mentorEmail: facultyMentor?.email || 'TBD',
+        teamLeadName: studentTeam?.leadName || 'TBD',
+        teamLeadEmail: studentTeam?.leadEmail || 'TBD',
+        teamMembersCount: parseInt(String(studentTeam?.membersCount || 4), 10),
+        teamDepartments: Array.isArray(studentTeam?.departments) ? studentTeam.departments : [],
+        budgetHardware: parseFloat(String(budgetBreakdown?.hardwareEquip || 0)),
+        budgetPrototyping: parseFloat(String(budgetBreakdown?.prototyping || 0)),
+        budgetFieldTesting: parseFloat(String(budgetBreakdown?.fieldTesting || 0)),
+        budgetTravel: parseFloat(String(budgetBreakdown?.travelAndLogistics || 0)),
+        budgetContingency: parseFloat(String(budgetBreakdown?.contingency || 0)),
+        budgetTotal: parseFloat(String(budgetBreakdown?.totalAmount || 0)),
+      };
+
+      console.log('Prisma payload being sent:', JSON.stringify(prismaData, null, 2));
+
+      const newProposal = await prisma.solutionProposal.create({
+        data: prismaData,
+      });
+
+      console.log('Proposal created successfully:', newProposal.id);
+
+      if (milestones && milestones.length > 0) {
+        await Promise.all(
+          milestones.map((m: any) =>
+            prisma.projectMilestone.create({
+              data: {
+                proposalId: newProposal.id,
+                title: m.title || 'Unnamed Milestone',
+                stage: m.stage || 'Ideation',
+                durationWeeks: parseInt(String(m.durationWeeks || 4), 10),
+                status: m.status || 'pending',
+                deliverable: m.deliverable || 'TBD',
+              },
+            })
+          )
+        );
+      }
+
+      try {
+        await problemsService.updateStatus(data.problemId, {
+          status: 'proposal_submitted',
+        });
+      } catch (statusError) {
+        console.error('Non-critical error updating problem status:', statusError);
+      }
+
+      return this.mapProposal(newProposal);
+    } catch (error: any) {
+      console.error('--- PROPOSAL CREATION ERROR ---');
+      console.error('Error message:', error.message);
+      console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      if (error.code) {
+        console.error('Prisma Error Code:', error.code);
+      }
+      throw new Error(`Proposal Creation Failed: ${error.message}`);
+    } finally {
+      console.log('--- PROPOSAL CREATION END ---');
+    }
   }
 
   async getProposalById(id: string) {

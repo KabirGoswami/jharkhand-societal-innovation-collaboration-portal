@@ -67,6 +67,14 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
   ]);
 
   const currentHei = universities.find((u) => u.id === selectedHeiId) || universities[0];
+
+  if (!currentHei) {
+    return (
+      <div className="flex items-center justify-center py-20 text-stone-500 font-serif italic">
+        Loading institutional data...
+      </div>
+    );
+  }
   const assignedProblems = problems.filter((p) => p.assignedHeiId === selectedHeiId);
   const heiProposals = proposals.filter((p) => p.heiId === selectedHeiId);
 
@@ -177,10 +185,12 @@ export const UniversityModule: React.FC<UniversityModuleProps> = ({
       await onSubmitProposal(payload);
       setTargetProblemForProposal(null);
       setActiveSubTab('proposals');
-      alert('Solution Proposal submitted successfully and dispatched for Industry/CSR partnership!');
-    } catch (err) {
+      setTimeout(() => {
+        alert('Solution Proposal submitted successfully and dispatched for Industry/CSR partnership!');
+      }, 10);
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to submit proposal.');
+      alert(err.message || 'Failed to submit proposal.');
     } finally {
       setIsSubmittingProposal(false);
     }

@@ -35,12 +35,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [selectedSortBy, setSelectedSortBy] = useState<'challenges' | 'active'>('challenges');
 
   // Sorted districts
-  const sortedDistricts = [...(analytics?.districtStats || [])].sort((a, b) => {
-    if (selectedSortBy === 'challenges') {
-      return (b?.challengesCount || 0) - (a?.challengesCount || 0);
-    }
-    return (b?.activeProjects || 0) - (a?.activeProjects || 0);
-  });
+  const sortedDistricts = React.useMemo(() => {
+    const stats = analytics?.districtStats || [];
+    return [...stats].sort((a, b) => {
+      if (selectedSortBy === 'challenges') {
+        return (b?.challengesCount || 0) - (a?.challengesCount || 0);
+      }
+      return (b?.activeProjects || 0) - (a?.activeProjects || 0);
+    });
+  }, [analytics?.districtStats, selectedSortBy]);
 
   // Calculate maximum challenges for proportional bars
   const maxDistrictChallenges = Math.max(...(analytics?.districtStats || []).map((d) => d?.challengesCount || 0), 1);

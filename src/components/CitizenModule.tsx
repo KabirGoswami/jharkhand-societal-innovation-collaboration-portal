@@ -185,7 +185,7 @@ export const CitizenModule: React.FC<CitizenModuleProps> = ({
         {filteredProblems.map((prob) => {
           const photoUrl =
             prob.mediaUrls?.[0] ||
-            'https://images.unsplash.com/photo-1518152006812-edab29b069ac?auto=format&fit=crop&w=600&q=80';
+            '/placeholder-image.jpg';
 
           return (
             <div

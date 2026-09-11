@@ -8,7 +8,7 @@ A centralized **NEP 2020** platform connecting citizen societal challenges acros
 |-------|-----------|
 | **Frontend** | React 19 · TypeScript · TailwindCSS v4 · Framer Motion · D3.js · Lucide Icons |
 | **Backend** | Express.js · TypeScript · Modular route/service architecture |
-| **Database** | SQLite via Prisma ORM |
+| **Database** | PostgreSQL (Supabase) via Prisma ORM |
 | **AI** | Google Gemini 3.6 Flash (problem analysis, proposal generation) |
 | **Auth** | JWT + bcryptjs (with dev-mode bypass) |
 | **Validation** | Zod v4 |
@@ -106,7 +106,7 @@ A centralized **NEP 2020** platform connecting citizen societal challenges acros
 │       ├── gemini.ts            # Gemini client singleton
 │       └── logger.ts            # Structured logging
 ├── prisma/
-│   ├── schema.prisma            # Full relational schema (SQLite)
+│   ├── schema.prisma            # Full relational schema (PostgreSQL)
 │   └── seed.ts                  # Database seed from jharkhandData
 ├── .env.example                 # Environment variable template
 ├── package.json

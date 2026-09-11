@@ -228,13 +228,12 @@ export const AIProblemManagement: React.FC<AIProblemManagementProps> = ({
                       {prob.district} • {prob.blockOrPanchayat}
                     </span>
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 shadow-xs ${
-                        prob.urgency === 'Critical'
+                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 shadow-xs ${prob.urgency === 'Critical'
                           ? 'bg-[#BC5434] text-white'
                           : prob.urgency === 'High'
-                          ? 'bg-stone-900 text-white'
-                          : 'bg-stone-200 text-stone-800'
-                      }`}
+                            ? 'bg-stone-900 text-white'
+                            : 'bg-stone-200 text-stone-800'
+                        }`}
                     >
                       {prob.urgency} Urgency
                     </span>

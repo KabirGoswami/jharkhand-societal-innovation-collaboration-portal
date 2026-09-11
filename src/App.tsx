@@ -55,7 +55,7 @@ export default function App() {
 
       if (probRes.ok) {
         const probData = await probRes.json();
-        const problemsData = probData.data || probData;
+        const problemsData = Array.isArray(probData.data) ? probData.data : (Array.isArray(probData) ? probData : []);
         const normalizedProblems = problemsData.map((p: any) => ({
           ...p,
           mediaUrls: p.mediaAttachments && p.mediaAttachments.length > 0
@@ -66,26 +66,26 @@ export default function App() {
       }
       if (anaRes.ok) {
         const anaData = await anaRes.json();
-        setAnalytics(anaData.data || anaData);
+        setAnalytics(anaData.data || anaData || {});
       }
       if (uniRes.ok) {
         const uniData = await uniRes.json();
-        setUniversities(uniData.data || uniData);
+        setUniversities(Array.isArray(uniData.data) ? uniData.data : (Array.isArray(uniData) ? uniData : []));
       }
       if (indRes.ok) {
         const indData = await indRes.json();
-        setIndustryPartners(indData.data || indData);
+        setIndustryPartners(Array.isArray(indData.data) ? indData.data : (Array.isArray(indData) ? indData : []));
       }
       if (propRes.ok) {
         const propData = await propRes.json();
-        setProposals(propData.data || propData);
+        setProposals(Array.isArray(propData.data) ? propData.data : (Array.isArray(propData) ? propData : []));
       }
       if (notifRes.ok) {
         const notifData = await notifRes.json();
-        setNotifications(notifData.data || notifData);
+        setNotifications(Array.isArray(notifData.data) ? notifData.data : (Array.isArray(notifData) ? notifData : []));
       }
     } catch (err) {
-      console.warn('API fetch warning, using seeded data:', err);
+      console.error('Fatal API fetch error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -146,14 +146,17 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProposalData),
       });
-      if (res.ok) {
-        const saved = await res.json();
-        setProposals((prev) => [saved, ...prev]);
-        // Also update the local problems array status
-        setProblems((prev) =>
-          prev.map((p) => (p.id === newProposalData.problemId ? { ...p, status: 'proposal_submitted' } : p))
-        );
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage = errorData.error?.message || errorData.message || `Failed to submit proposal: ${res.statusText}`;
+        throw new Error(errorMessage);
       }
+      const saved = await res.json();
+      setProposals((prev) => [saved, ...prev]);
+      // Also update the local problems array status
+      setProblems((prev) =>
+        prev.map((p) => (p.id === newProposalData.problemId ? { ...p, status: 'proposal_submitted' } : p))
+      );
     } catch (err) {
       console.error(err);
       throw err;
