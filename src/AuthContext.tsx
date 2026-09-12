@@ -17,6 +17,7 @@ interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   login: (token: string) => Promise<void>;
+  bypassLogin: () => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
   completeProfile: (data: any) => Promise<{ success: boolean; verificationStatus: VerificationStatus }>;
@@ -63,6 +64,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await refreshUser();
   };
 
+  const bypassLogin = useCallback(() => {
+    const mockUser: UserProfile = {
+      id: 'dev-bypass-id',
+      email: 'dev@bypass.com',
+      fullName: 'Dev Bypass User',
+      role: 'SUPER_ADMIN',
+      verificationStatus: 'VERIFIED',
+    };
+    localStorage.setItem('auth_token', 'dev-bypass-token');
+    setUser(mockUser);
+    setIsLoading(false);
+  }, []);
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     setUser(null);
@@ -99,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isLoading,
     login,
+    bypassLogin,
     logout,
     refreshUser,
     completeProfile,

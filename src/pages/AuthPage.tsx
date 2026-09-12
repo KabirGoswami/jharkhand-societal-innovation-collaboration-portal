@@ -11,7 +11,7 @@ export const AuthPage = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, completeProfile } = useAuth();
+  const { login, completeProfile, bypassLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -115,8 +115,8 @@ export const AuthPage = () => {
             <div className="pt-6 border-t border-stone-100 text-center">
               <button
                 type="button"
-                onClick={async () => {
-                  await login('mock-jwt-token');
+                onClick={() => {
+                  bypassLogin();
                   navigate(from, { replace: true });
                 }}
                 className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
